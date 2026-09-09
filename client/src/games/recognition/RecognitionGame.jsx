@@ -458,7 +458,7 @@ export default function RecognitionGame() {
   // --------------------------------
 
   function handleExit() {
-    navigate("/games");
+    navigate("/patient");
   }
 
   // --------------------------------
@@ -801,7 +801,7 @@ export default function RecognitionGame() {
             className="recognition-exit"
             onClick={handleExit}
           >
-            ← Exit
+            ← Back
           </button>
 
           {wrongQuestions.length > 0 ? (
@@ -835,7 +835,7 @@ export default function RecognitionGame() {
             className="recognition-games-button"
             onClick={handleExit}
           >
-            Back to Main Menu
+            Back to Patient Home
           </button>
         </div>
       </div>
@@ -855,7 +855,7 @@ export default function RecognitionGame() {
             className="recognition-exit"
             onClick={handleExit}
           >
-            ← Exit
+            ← Back
           </button>
         </div>
 

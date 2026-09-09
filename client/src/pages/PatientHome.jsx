@@ -5,7 +5,7 @@ import "./PatientHome.css";
 const games = [
   {
     id: "memory",
-    name: "Memory Puzzles",
+    name: "Match The Pairs",
     description: "Train your memory, one step at a time!",
     icon: "✣",
     type: "memory",
