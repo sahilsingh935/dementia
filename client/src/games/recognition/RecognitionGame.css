@@ -1,0 +1,785 @@
+/* ==================================================
+   MAIN CONTAINER
+   ================================================== */
+
+.recognition-container {
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+
+  background: #f4f7f6;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 30px 20px;
+  color: #3d342c;
+}
+
+/* ==================================================
+   QUIZ
+   ================================================== */
+
+.recognition-quiz {
+  width: 100%;
+  max-width: 900px;
+
+  background: #ffffff;
+
+  border-radius: 24px;
+
+  padding: 30px 35px 40px;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ==================================================
+   TOP BAR
+   ================================================== */
+
+.recognition-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  margin-bottom: 10px;
+}
+
+.recognition-exit {
+  border: none;
+
+  background: transparent;
+
+  color: #4a3420;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  padding: 8px 12px;
+
+  border-radius: 10px;
+
+  transition: background 0.2s ease;
+}
+
+.recognition-exit:hover {
+  background: #f0ebe5;
+}
+
+/* ==================================================
+   TITLE
+   ================================================== */
+
+.recognition-quiz h1,
+.recognition-result h1 {
+  text-align: center;
+
+  color: #4a3420;
+
+  font-size: 32px;
+
+  margin: 8px 0 5px;
+
+  font-weight: 700;
+}
+
+.recognition-subtitle {
+  text-align: center;
+
+  color: #6f6258;
+
+  font-size: 18px;
+
+  margin-bottom: 20px;
+
+  font-weight: 600;
+}
+
+/* ==================================================
+   PROGRESS
+   ================================================== */
+
+.recognition-progress {
+  width: fit-content;
+
+  margin: 0 auto 22px;
+
+  padding: 8px 16px;
+
+  background: #eef3ef;
+
+  color: #2d5a3d;
+
+  border-radius: 20px;
+
+  font-size: 15px;
+
+  font-weight: 600;
+}
+
+/* ==================================================
+   QUESTION BOX
+   ================================================== */
+
+.recognition-question-box {
+  background: #faf7f2;
+
+  border: 1px solid #eadfd3;
+
+  border-radius: 18px;
+
+  padding: 22px 25px;
+
+  margin-bottom: 25px;
+
+  text-align: center;
+}
+
+.recognition-question-box p {
+  margin: 0;
+
+  color: #3d342c;
+
+  font-size: 21px;
+
+  line-height: 1.5;
+
+  font-weight: 600;
+}
+
+/* ==================================================
+   OPTIONS
+   ================================================== */
+
+.recognition-options {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 18px;
+
+  margin-bottom: 22px;
+}
+
+.recognition-option {
+  border: 2px solid #ded6ce;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  padding: 12px;
+
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  gap: 12px;
+
+  min-height: 230px;
+
+  color: #3d342c;
+
+  font-size: 17px;
+  font-weight: 600;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.recognition-option:hover:not(:disabled) {
+  transform: translateY(-3px);
+
+  border-color: #8b6f50;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.recognition-option.selected {
+  border-color: #4a3420;
+
+  background: #faf5ee;
+
+  box-shadow: 0 0 0 3px rgba(74, 52, 32, 0.08);
+}
+
+.recognition-option.correct {
+  border-color: #2d7a4b;
+
+  background: #eef8f1;
+}
+
+.recognition-option.wrong {
+  border-color: #b94a48;
+
+  background: #fff1f0;
+}
+
+.recognition-option:disabled {
+  cursor: default;
+}
+
+/* ==================================================
+   OPTION IMAGE
+   ================================================== */
+
+.recognition-option-image {
+  width: 100%;
+
+  height: 150px;
+
+  object-fit: cover;
+
+  border-radius: 12px;
+
+  display: block;
+
+  background: #eee;
+}
+
+/* ==================================================
+   HINT
+   ================================================== */
+
+.recognition-hint-button {
+  display: block;
+
+  margin: 0 auto 12px;
+
+  border: 1px solid #d8cbbd;
+
+  background: #fffaf4;
+
+  color: #6a4b2e;
+
+  border-radius: 12px;
+
+  padding: 10px 18px;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.recognition-hint-button:hover {
+  background: #f5eadc;
+}
+
+.recognition-hint-text {
+  max-width: 650px;
+
+  margin: 0 auto 18px;
+
+  padding: 13px 18px;
+
+  background: #fff8e9;
+
+  border: 1px solid #ead9b5;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  color: #685331;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+/* ==================================================
+   BUTTONS
+   ================================================== */
+
+.recognition-buttons {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 14px;
+
+  margin-top: 18px;
+}
+
+.recognition-buttons button {
+  min-width: 120px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  padding: 12px 22px;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  background: #2d5a3d;
+
+  color: white;
+
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.recognition-buttons button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.recognition-buttons button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+/* ==================================================
+   FEEDBACK
+   ================================================== */
+
+.recognition-feedback {
+  margin: 20px auto 0;
+
+  max-width: 600px;
+
+  padding: 14px 20px;
+
+  border-radius: 14px;
+
+  text-align: center;
+
+  font-size: 17px;
+
+  font-weight: 600;
+}
+
+.recognition-feedback.success {
+  background: #eaf7ed;
+
+  color: #24633a;
+
+  border: 1px solid #b9dfc2;
+}
+
+.recognition-feedback.error {
+  background: #fff0ef;
+
+  color: #a33e3c;
+
+  border: 1px solid #e5b9b7;
+}
+
+/* ==================================================
+   LOADING
+   ================================================== */
+
+.recognition-loading {
+  min-height: 300px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+
+  color: #5d5147;
+}
+
+/* ==================================================
+   RESULT SCREEN
+   ================================================== */
+
+.recognition-result {
+  width: 100%;
+
+  max-width: 700px;
+
+  background: #ffffff;
+
+  border-radius: 24px;
+
+  padding: 30px 35px 40px;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+
+  position: relative;
+}
+
+.recognition-result > .recognition-exit {
+  position: absolute;
+
+  top: 22px;
+  left: 22px;
+}
+
+/* ==================================================
+   SCOREBOARD
+   ================================================== */
+
+.recognition-scoreboard {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 18px;
+
+  margin: 30px 0;
+}
+
+.recognition-score-item {
+  background: #f8f5f1;
+
+  border: 1px solid #e7ddd3;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  text-align: center;
+}
+
+.recognition-score-number {
+  color: #4a3420;
+
+  font-size: 30px;
+
+  font-weight: 700;
+
+  margin-bottom: 5px;
+}
+
+.recognition-score-label {
+  color: #75685d;
+
+  font-size: 15px;
+
+  font-weight: 600;
+}
+
+/* ==================================================
+   RESULT MESSAGE
+   ================================================== */
+
+.recognition-result-box {
+  background: #faf7f2;
+
+  border: 1px solid #eadfd3;
+
+  border-radius: 16px;
+
+  padding: 18px 20px;
+
+  text-align: center;
+
+  color: #55483e;
+
+  font-size: 17px;
+
+  line-height: 1.5;
+
+  margin-bottom: 25px;
+}
+
+/* ==================================================
+   RETRY
+   ================================================== */
+
+.recognition-retry-heading {
+  text-align: center;
+
+  color: #4a3420;
+
+  margin: 25px 0 12px;
+}
+
+.recognition-retry-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.recognition-retry-item {
+  background: #fff7f5;
+
+  border: 1px solid #ead0cc;
+
+  border-radius: 12px;
+
+  padding: 12px 15px;
+
+  color: #654943;
+
+  font-size: 14px;
+
+  line-height: 1.4;
+}
+
+.recognition-retry-button {
+  display: block;
+
+  width: 100%;
+
+  border: none;
+
+  border-radius: 12px;
+
+  padding: 13px 20px;
+
+  background: #9b594c;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  margin-bottom: 12px;
+}
+
+/* ==================================================
+   RESULT BUTTONS
+   ================================================== */
+
+.recognition-home-button,
+.recognition-games-button {
+  display: block;
+
+  width: 100%;
+
+  border: none;
+
+  border-radius: 12px;
+
+  padding: 14px 20px;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  margin-top: 12px;
+}
+
+.recognition-home-button {
+  background: #2d5a3d;
+
+  color: white;
+}
+
+.recognition-games-button {
+  background: #eee9e4;
+
+  color: #4a3420;
+}
+
+/* ==================================================
+   TABLET
+   ================================================== */
+
+@media (max-width: 800px) {
+  .recognition-container {
+    padding: 20px 14px;
+  }
+
+  .recognition-quiz,
+  .recognition-result {
+    padding: 25px 22px 30px;
+  }
+
+  .recognition-options {
+    gap: 12px;
+  }
+
+  .recognition-option {
+    min-height: 200px;
+
+    font-size: 16px;
+  }
+
+  .recognition-option-image {
+    height: 125px;
+  }
+
+  .recognition-question-box p {
+    font-size: 19px;
+  }
+}
+
+/* ==================================================
+   MOBILE
+   ================================================== */
+
+@media (max-width: 600px) {
+  .recognition-container {
+    min-height: 100vh;
+
+    padding: 10px;
+  }
+
+  .recognition-quiz,
+  .recognition-result {
+    border-radius: 18px;
+
+    padding: 20px 15px 25px;
+
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  .recognition-quiz h1,
+  .recognition-result h1 {
+    font-size: 26px;
+
+    margin-top: 10px;
+  }
+
+  .recognition-subtitle {
+    font-size: 16px;
+
+    margin-bottom: 16px;
+  }
+
+  .recognition-progress {
+    font-size: 14px;
+
+    margin-bottom: 18px;
+  }
+
+  .recognition-question-box {
+    padding: 17px 15px;
+
+    margin-bottom: 18px;
+  }
+
+  .recognition-question-box p {
+    font-size: 18px;
+
+    line-height: 1.4;
+  }
+
+  /* One option per row on mobile */
+
+  .recognition-options {
+    grid-template-columns: 1fr;
+
+    gap: 12px;
+  }
+
+  .recognition-option {
+    min-height: auto;
+
+    display: grid;
+
+    grid-template-columns: 105px 1fr;
+
+    align-items: center;
+
+    text-align: left;
+
+    padding: 9px;
+
+    gap: 12px;
+  }
+
+  .recognition-option-image {
+    width: 105px;
+
+    height: 90px;
+
+    border-radius: 10px;
+  }
+
+  .recognition-option span {
+    font-size: 16px;
+  }
+
+  .recognition-buttons {
+    gap: 10px;
+  }
+
+  .recognition-buttons button {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 12px 10px;
+  }
+
+  .recognition-scoreboard {
+    gap: 10px;
+
+    margin: 22px 0;
+  }
+
+  .recognition-score-item {
+    padding: 15px 10px;
+  }
+
+  .recognition-score-number {
+    font-size: 25px;
+  }
+
+  .recognition-score-label {
+    font-size: 13px;
+  }
+
+  .recognition-result-box {
+    font-size: 15px;
+
+    padding: 15px;
+  }
+
+  .recognition-exit {
+    font-size: 14px;
+  }
+}
+
+/* ==================================================
+   VERY SMALL PHONES
+   ================================================== */
+
+@media (max-width: 380px) {
+  .recognition-option {
+    grid-template-columns: 85px 1fr;
+  }
+
+  .recognition-option-image {
+    width: 85px;
+
+    height: 75px;
+  }
+
+  .recognition-option span {
+    font-size: 15px;
+  }
+
+  .recognition-question-box p {
+    font-size: 17px;
+  }
+}

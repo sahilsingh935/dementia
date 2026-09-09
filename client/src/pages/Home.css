@@ -1,0 +1,1784 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap");
+
+:root {
+  --navy: #102d58;
+  --blue: #2587e8;
+  --blue-soft: #eaf5fd;
+
+  --lav: #e7ddff;
+  --mint: #d9f3e5;
+  --yellow: #fff0c8;
+  --pink: #ffdfe4;
+
+  --cream: #fff9f0;
+  --white: #fff;
+
+  --bg: #edf6fb;
+  --muted: #687c99;
+  --line: #d9e5ef;
+
+  --shadow: 0 12px 32px rgba(24, 61, 100, 0.11);
+
+  --radius: 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Nunito", system-ui, sans-serif;
+  color: var(--navy);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.home-page {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+
+  background-image: url("/home-bg.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ==========================================
+   MAIN ROLE SCREEN
+========================================== */
+
+.role-screen {
+  width: 100%;
+  height: 100vh;
+
+  display: grid;
+  grid-template-columns: 58% 42%;
+
+  position: relative;
+}
+
+/* ==========================================
+   LEFT HERO
+========================================== */
+
+.role-hero {
+  position: relative;
+  overflow: hidden;
+
+  min-height: 100vh;
+
+  background: transparent;
+}
+
+.role-hero-content {
+  position: relative;
+  z-index: 2;
+
+  padding: 6vh 7vw 4vh;
+
+  max-width: 900px;
+}
+
+/* ==========================================
+   BRAND
+========================================== */
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  color: var(--navy);
+
+  position: relative;
+  z-index: 3;
+}
+
+.brand-logo-img {
+  width: 46px;
+  height: 46px;
+
+  border-radius: 12px;
+
+  object-fit: cover;
+
+  box-shadow: 0 4px 10px rgba(16, 45, 88, 0.12);
+}
+
+.brand-large strong {
+  display: block;
+
+  font-family: "Cormorant Garamond", Georgia, serif;
+
+  font-size: 40px;
+
+  line-height: 1;
+
+  letter-spacing: 1px;
+
+  color: #284c39;
+}
+
+.brand-large small {
+  display: block;
+
+  color: #5d718e;
+
+  font-size: 18px;
+
+  margin-top: 2px;
+}
+
+/* ==========================================
+   TYPOGRAPHY
+========================================== */
+
+.eyebrow {
+  font-family: "Nunito", sans-serif;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  letter-spacing: 2.5px;
+
+  color: #486653;
+
+  margin: 0 0 12px;
+}
+
+.role-hero h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+
+  color: #274b38;
+
+  font-size: clamp(38px, 4.1vw, 62px);
+
+  line-height: 1.04;
+
+  margin: 0 0 12px;
+
+  letter-spacing: -1.5px;
+
+  font-weight: 700;
+}
+
+.hero-lead {
+  font-size: 21px;
+
+  color: #526b8b;
+
+  margin: 0 0 4vh;
+}
+
+.role-prompt {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 25px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: #214f3b;
+  margin: 0 0 14px;
+}
+
+/* ==========================================
+   ROLE BUTTONS
+========================================== */
+
+.role-buttons {
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 14px;
+
+  max-width: 610px;
+}
+
+.role-card {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 16px;
+
+  padding: 18px 20px;
+
+  border: 1px solid rgba(255, 255, 255, 0.8);
+
+  border-radius: 22px;
+
+  background: rgba(255, 255, 255, 0.82);
+
+  box-shadow: 0 9px 25px rgba(42, 86, 119, 0.09);
+
+  color: var(--navy);
+
+  text-align: left;
+
+  transition: 0.25s;
+}
+
+.role-card:hover,
+.role-card:focus-visible {
+  transform: translateY(-3px);
+
+  box-shadow: 0 14px 32px rgba(42, 86, 119, 0.14);
+
+  outline: none;
+}
+
+.role-icon {
+  width: 54px;
+  height: 54px;
+
+  flex: none;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  font-size: 28px;
+
+  background: var(--lav);
+
+  color: #6952a3;
+}
+
+.caretaker-role .role-icon {
+  background: var(--mint);
+
+  color: #247c63;
+}
+
+.role-text {
+  flex: 1;
+}
+
+.role-card strong {
+  display: block;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 23px;
+  font-weight: 700;
+  color: #214f3b;
+}
+
+.role-card small {
+  display: block;
+
+  color: #65766d;
+
+  margin-top: 2px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.role-card > b {
+  font-size: 30px;
+
+  font-weight: 400;
+}
+
+/* ==========================================
+   QUOTE
+========================================== */
+
+.role-quote {
+  font-size: 16px;
+
+  font-style: italic;
+
+  color: #55708e;
+
+  margin-top: 3vh;
+}
+
+/* ==========================================
+   RIGHT IMAGE STRIP
+========================================== */
+
+.role-art-strip {
+  position: relative;
+
+  overflow: hidden;
+
+  background: transparent;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  height: 85vh;
+
+  width: 90%;
+
+  max-width: 480px;
+
+  margin: auto;
+
+  border-radius: 28px;
+
+  box-shadow: 0 12px 32px rgba(24, 61, 100, 0.12);
+}
+
+.art-slide {
+  position: absolute;
+
+  inset: 0;
+
+  opacity: 0;
+
+  transition: opacity 1s ease-in-out;
+}
+
+.art-slide.active {
+  opacity: 1;
+}
+
+.art-bg-img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+  border-radius: 28px;
+}
+
+.art-caption {
+  position: absolute;
+
+  bottom: 28px;
+
+  left: 25px;
+  right: 25px;
+
+  text-align: center;
+
+  font-size: 15px;
+
+  color: #426887;
+
+  font-weight: 700;
+
+  background: rgba(255, 255, 255, 0.68);
+
+  padding: 12px 16px;
+
+  border-radius: 18px;
+
+  z-index: 5;
+}
+
+/* ==========================================
+   MOBILE IMAGE
+========================================== */
+
+.mobile-art-card {
+  display: none;
+}
+
+/* ==========================================
+   AUTH MODAL
+========================================== */
+
+.modal-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(17, 43, 72, 0.35);
+
+  backdrop-filter: blur(5px);
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 24px;
+
+  z-index: 100;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.88);
+
+  border: 1px solid rgba(255, 255, 255, 0.85);
+
+  box-shadow: var(--shadow);
+
+  border-radius: var(--radius);
+}
+
+.auth-modal {
+  width: min(1080px, 96vw);
+
+  min-height: 640px;
+
+  display: grid;
+
+  grid-template-columns: 44% 56%;
+
+  overflow: hidden;
+
+  background: #fff;
+
+  position: relative;
+}
+
+/* ==========================================
+   AUTH ART
+========================================== */
+
+.auth-art-pane {
+  position: relative;
+
+  min-height: 100%;
+
+  overflow: hidden;
+}
+
+.auth-art {
+  position: absolute;
+
+  inset: 0;
+
+  overflow: hidden;
+}
+
+.auth-art-slideshow {
+  position: absolute;
+
+  inset: 0;
+
+  overflow: hidden;
+}
+
+.auth-art-slide {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  opacity: 0;
+
+  transform: translate3d(0, 0, 0) scale(1);
+
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+
+.auth-art-slide.active {
+  opacity: 1;
+
+  transform: translate3d(0, 0, 0) scale(1.02);
+}
+
+.auth-art::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background: linear-gradient(
+    180deg,
+    rgba(16, 45, 88, 0.08),
+    rgba(16, 45, 88, 0.35)
+  );
+
+  pointer-events: none;
+}
+
+/* ==========================================
+   AUTH FORM
+========================================== */
+
+.auth-form-pane {
+  padding: 46px 52px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+.auth-role-pill {
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.5px;
+
+  color: #805033;
+
+  background: #eee2c9;
+
+  padding: 8px 12px;
+
+  border-radius: 999px;
+
+  display: inline-block;
+
+  align-self: flex-start;
+}
+
+.auth-heading {
+  text-align: center;
+
+  margin: 18px 0 28px;
+}
+
+.auth-heading h2 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+
+  font-size: 38px;
+
+  margin: 0 0 5px;
+
+  color: #274b38;
+
+  font-weight: 700;
+}
+
+.auth-heading p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 16px;
+}
+
+/* ==========================================
+   AUTH TABS
+========================================== */
+
+.auth-tabs {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  background: #f0e5d1;
+
+  padding: 4px;
+
+  border-radius: 15px;
+
+  margin-bottom: 22px;
+}
+
+.auth-tab {
+  border: 0;
+
+  background: transparent;
+
+  color: #637795;
+
+  padding: 11px;
+
+  border-radius: 12px;
+
+  font-weight: 800;
+}
+
+.auth-tab.active {
+  background: #e9d9bd;
+
+  color: #75462d;
+}
+
+/* ==========================================
+   INPUTS
+========================================== */
+
+.field {
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  margin: 12px 0;
+}
+
+.field input {
+  width: 100%;
+
+  height: 58px;
+
+  border: 1.5px solid #dfcfb5;
+
+  border-radius: 17px;
+
+  padding: 0 46px;
+
+  color: var(--navy);
+
+  background: rgba(255, 250, 241, 0.92);
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.field input:focus {
+  border-color: #ad613c;
+
+  box-shadow: 0 0 0 4px rgba(173, 97, 60, 0.12);
+}
+
+.field-icon {
+  position: absolute;
+
+  left: 16px;
+
+  color: #7185a1;
+
+  font-size: 15px;
+
+  font-weight: 800;
+
+  z-index: 1;
+}
+
+.password-toggle {
+  position: absolute;
+
+  right: 12px;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #7185a1;
+
+  padding: 9px;
+}
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+.primary-btn {
+  border: 0;
+
+  background: linear-gradient(135deg, #b85d35, #96502f);
+
+  color: #fff;
+
+  border-radius: 17px;
+
+  min-height: 56px;
+
+  padding: 0 24px;
+
+  font-weight: 800;
+
+  font-size: 17px;
+
+  box-shadow: 0 8px 18px rgba(150, 80, 47, 0.23);
+
+  transition: 0.2s;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+}
+
+.full-btn {
+  width: 100%;
+
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.text-link {
+  border: 0;
+
+  background: none;
+
+  color: #9b5534;
+
+  font-weight: 700;
+}
+
+.switch-copy {
+  text-align: center;
+
+  color: #647793;
+
+  font-size: 14px;
+
+  margin: 20px 0 0;
+}
+
+.login-note {
+  font-size: 12px;
+
+  color: #7a8da4;
+
+  text-align: center;
+
+  margin-top: 14px;
+}
+
+.terms-check {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 8px;
+
+  font-size: 13px;
+
+  color: #637792;
+
+  margin: 13px 0;
+}
+
+.terms-check input {
+  accent-color: var(--blue);
+
+  margin-top: 3px;
+}
+
+/* ==========================================
+   CLOSE BUTTON
+========================================== */
+
+.modal-close {
+  position: absolute;
+
+  right: 16px;
+
+  top: 12px;
+
+  border: 0;
+
+  background: transparent;
+
+  font-size: 30px;
+
+  color: #657995;
+
+  z-index: 10;
+
+  line-height: 1;
+}
+
+/* ==========================================
+   TOAST
+========================================== */
+
+.toast-container {
+  position: fixed;
+
+  left: 50%;
+
+  bottom: 24px;
+
+  transform: translateX(-50%);
+
+  z-index: 200;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 9px;
+
+  align-items: center;
+
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--navy);
+
+  color: #fff;
+
+  padding: 12px 18px;
+
+  border-radius: 15px;
+
+  box-shadow: 0 10px 25px rgba(16, 45, 88, 0.22);
+
+  max-width: min(520px, 90vw);
+
+  text-align: center;
+
+  font-size: 14px;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 1180px) {
+  .role-screen {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .role-hero-content {
+    padding-left: 5vw;
+    padding-right: 4vw;
+  }
+
+  .role-art-strip {
+    width: 90%;
+    max-width: 430px;
+  }
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 760px) {
+  .home-page {
+    height: 100dvh;
+
+    min-height: 100dvh;
+
+    overflow: hidden;
+  }
+
+  .role-screen {
+    height: 100dvh;
+
+    min-height: 100dvh;
+
+    display: block;
+  }
+
+  .role-hero {
+    height: 100dvh;
+
+    min-height: 100dvh;
+
+    overflow: hidden;
+  }
+
+  .role-hero-content {
+    height: 100dvh;
+
+    padding: 16px 24px;
+
+    display: flex;
+
+    flex-direction: column;
+  }
+
+  .brand-logo-img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .brand-large strong {
+    font-size: 27px;
+  }
+
+  .brand-large small {
+    font-size: 12px;
+  }
+
+  .role-hero .brand {
+    margin-bottom: clamp(20px, 4dvh, 34px);
+  }
+
+  .role-hero h1 {
+    margin: 0 0 12px;
+  }
+
+  .hero-lead {
+    margin: 0 0 20px;
+  }
+
+  .role-prompt {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 25px;
+    line-height: 1.15;
+    font-weight: 700;
+    color: #214f3b;
+
+    margin: 0 0 14px;
+  }
+
+  .role-buttons {
+    display: grid;
+
+    grid-template-columns: 1fr;
+
+    gap: 12px;
+
+    max-width: 680px;
+  }
+
+  .role-card {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 17px 20px;
+
+    border: 1px solid rgba(255, 255, 255, 0.8);
+
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.82);
+
+    box-shadow: 0 9px 25px rgba(42, 86, 119, 0.09);
+
+    color: var(--navy);
+
+    text-align: left;
+
+    transition: 0.25s;
+  }
+
+  .role-card .role-icon {
+    width: 58px;
+    height: 58px;
+
+    font-size: 28px;
+  }
+
+  .role-card strong {
+    font-size: 21px;
+  }
+
+  .role-card small {
+    font-size: 13px;
+
+    line-height: 1.25;
+  }
+
+  .role-card > b {
+    font-size: 30px;
+    font-weight: 400;
+    color: #214f3b;
+  }
+
+  .role-quote {
+    font-family: "Cormorant Garamond", Georgia, serif;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    font-style: italic;
+
+    color: #526b60;
+
+    margin-top: 16px;
+
+    margin-left: 2px;
+  }
+
+  /* MOBILE ART */
+
+  .role-art-strip {
+    display: none;
+  }
+
+  .mobile-art-card {
+    position: relative;
+
+    display: block;
+
+    height: clamp(175px, 27dvh, 220px);
+
+    margin-top: auto;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+
+    background: #dcefc8;
+
+    box-shadow: 0 10px 24px rgba(24, 61, 100, 0.12);
+  }
+
+  .mobile-art-slide {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    opacity: 0;
+
+    transition: opacity 0.8s ease;
+  }
+
+  .mobile-art-slide.active {
+    opacity: 1;
+  }
+
+  .mobile-art-card::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background: linear-gradient(180deg, transparent 42%, rgba(16, 45, 88, 0.5));
+
+    pointer-events: none;
+  }
+
+  .mobile-art-card p {
+    position: absolute;
+
+    z-index: 1;
+
+    right: 12px;
+
+    bottom: 12px;
+
+    left: 12px;
+
+    padding: 8px 12px;
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.78);
+
+    color: #426887;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    line-height: 1.25;
+
+    text-align: center;
+  }
+
+  /* AUTH MODAL */
+
+  .modal-backdrop {
+    place-items: end center;
+
+    padding: 0;
+  }
+
+  .auth-modal {
+    width: 100%;
+
+    max-height: 92dvh;
+
+    min-height: 0;
+
+    grid-template-columns: 1fr;
+
+    overflow-y: auto;
+
+    border-radius: 24px 24px 0 0;
+  }
+
+  .auth-art-pane {
+    display: none;
+  }
+
+  .auth-form-pane {
+    padding: 30px 22px calc(30px + env(safe-area-inset-bottom));
+  }
+
+  .auth-heading h2 {
+    font-size: 31px;
+  }
+}
+
+/* ==========================================
+   VERY SMALL PHONES
+========================================== */
+
+@media (max-width: 760px) and (max-height: 680px) {
+  .role-hero .brand {
+    margin-bottom: 14px;
+  }
+
+  .role-hero h1 {
+    font-size: 29px;
+  }
+
+  .hero-lead {
+    font-family: "Nunito", sans-serif;
+    color: #526b60;
+    font-weight: 600;
+  }
+
+  .mobile-art-card {
+    display: none;
+  }
+}
+
+/* ==========================================
+   MANAS REFERENCE FONT & COLOR THEME
+========================================== */
+
+/* Main heading */
+.role-hero h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 700;
+  color: #214f3b;
+  letter-spacing: -1.5px;
+}
+
+/* MANAS logo text */
+.brand-large strong {
+  display: block;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: 1px;
+  color: #214f3b;
+  font-weight: 700;
+}
+
+/* Tagline under MANAS */
+.brand-large small {
+  display: block;
+  color: #526b60;
+  font-size: 16px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* A GENTLE SPACE FOR WELLNESS */
+.eyebrow {
+  font-family: "Nunito", sans-serif;
+  color: #486653;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+/* Play • Practice • Feel Better */
+.hero-lead {
+  font-family: "Nunito", sans-serif;
+  color: #526b60;
+  font-weight: 600;
+}
+
+/* Who is joining MANAS today? */
+.role-prompt {
+  font-family: "Cormorant Garamond", Georgia, serif !important;
+  font-size: 25px !important;
+  line-height: 1.15 !important;
+  font-weight: 700 !important;
+  color: #214f3b !important;
+  margin: 0 0 14px !important;
+}
+
+/* Patient / Caretaker title */
+.role-card strong {
+  display: block;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 21px;
+  font-weight: 700;
+  color: #214f3b;
+}
+
+/* Card descriptions */
+.role-card small {
+  font-family: "Nunito", sans-serif;
+  color: #65766d;
+  font-weight: 600;
+}
+
+/* Arrow */
+.role-card > b {
+  color: #214f3b;
+  font-family: "Nunito", sans-serif;
+}
+
+/* Bottom quote */
+.role-quote {
+  margin-top: 18px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  font-style: italic;
+  color: #526b60;
+}
+
+.tomorrow {
+  color: #b85d35;
+}
+
+/* ==========================================
+   FINAL HOME SPACING & ALIGNMENT
+========================================== */
+
+@media (min-width: 769px) {
+  .role-hero-content {
+    padding-top: 5vh;
+  }
+
+  .role-prompt {
+    margin-top: 22px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .role-buttons {
+    gap: 12px;
+    max-width: 580px;
+  }
+
+  .role-card {
+    padding: 17px 22px;
+  }
+
+  .role-quote {
+    margin-top: 14px;
+  }
+
+  .role-art-strip {
+    width: 86%;
+    max-width: 450px;
+    height: 84vh;
+  }
+}
+
+/* ===== ONLY SPACING FIX ===== */
+
+.brand-large {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 8px;
+}
+
+.brand-large span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-large strong {
+  margin: 0;
+  line-height: 0.9;
+}
+
+.brand-large small {
+  margin-top: 8px;
+  line-height: 1;
+}
+
+.eyebrow {
+  margin-top: 12px;
+}
+
+/* ===== MANAS ELEGANT SERIF FONT ===== */
+
+.brand-large strong,
+.role-hero h1,
+.role-prompt,
+.role-card strong,
+.role-quote {
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+/* MANAS */
+.brand-large strong {
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Main heading */
+.role-hero h1 {
+  font-size: clamp(48px, 5vw, 66px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -1px;
+}
+
+/* Who is joining */
+.role-prompt {
+  font-size: 27px !important;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.2px;
+}
+
+/* Patient / Caretaker */
+.role-card strong {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Quote */
+.role-quote {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 19px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* ===== MANAS LOGO TEXT - FINAL ===== */
+
+.brand-large strong {
+  font-family: "Cormorant Garamond", Georgia, serif !important;
+  font-size: 44px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  line-height: 0.92 !important;
+  color: #214f3b !important;
+  margin: 0 !important;
+}
+
+.brand-large small {
+  font-family: "Nunito", sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px !important;
+  line-height: 1 !important;
+  color: #526b60 !important;
+  margin-top: 7px !important;
+}
+
+/* ==========================================
+   ROLE ICON COLORS
+========================================== */
+
+.patient-icon {
+  background: #f9d8c8 !important;
+  color: #b85d35 !important;
+}
+
+.caretaker-icon {
+  background: #d9eedf !important;
+  color: #214f3b !important;
+}
+
+/* ==========================================
+   ROLE ARROWS
+========================================== */
+
+.patient-role > b {
+  width: 56px;
+  height: 56px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #b85d35;
+  color: white;
+
+  font-size: 28px;
+  font-weight: 400;
+
+  line-height: 1;
+}
+
+.caretaker-role > b {
+  width: 56px;
+  height: 56px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #214f3b;
+  color: white;
+
+  font-size: 28px;
+  font-weight: 400;
+
+  line-height: 1;
+}
+
+/* ROLE ICON IMAGES */
+
+.role-icon img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  display: block;
+}
+
+.patient-icon {
+  background: #f9d8c8 !important;
+}
+
+.caretaker-icon {
+  background: #d9eedf !important;
+}
+
+/* PATIENT ARROW */
+
+.patient-role > b,
+.caretaker-role > b {
+  width: 56px;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.patient-role > b {
+  background: #b85d35;
+  color: #fff;
+}
+
+.caretaker-role > b {
+  background: #214f3b;
+  color: #fff;
+}
+
+/* Patient icon - zoom */
+.patient-icon img {
+  width: 95% !important;
+  height: 95% !important;
+  object-fit: contain;
+}
+
+/* Who is joining - bold */
+.role-prompt {
+  font-family: "Cormorant Garamond", Georgia, serif !important;
+  font-size: 27px !important;
+  font-weight: 700 !important;
+  -webkit-text-stroke: 0.2px #214f3b;
+  color: #214f3b !important;
+  line-height: 1.1 !important;
+  letter-spacing: 0 !important;
+  margin: 22px 0 14px !important;
+}
+
+/* Quote - more visible */
+.role-quote {
+  font-family: "Cormorant Garamond", Georgia, serif !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  font-style: italic;
+
+  color: #3f604f !important;
+
+  opacity: 1 !important;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+
+  margin-top: 18px !important;
+}
+
+/* ==========================================
+   FULL CARD TEXTURE
+========================================== */
+
+.role-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Texture covers the complete card */
+.role-card::after {
+  content: "";
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background-image: url("/mountain.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  opacity: 0.3;
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Content stays above texture */
+.role-card .role-icon,
+.role-card .role-text,
+.role-card > b {
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================
+   REMOVE PATIENT / CARETAKER CARD ANIMATION
+========================================== */
+
+.patient-role,
+.caretaker-role {
+  transition: none !important;
+  transform: none !important;
+}
+
+.patient-role:hover,
+.caretaker-role:hover,
+.patient-role:active,
+.caretaker-role:active,
+.patient-role:focus,
+.caretaker-role:focus {
+  transform: none !important;
+  transition: none !important;
+}
+
+.brand-logo-img {
+  width: 95px;
+  height: 95px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Remove outer logo box/border */
+.brand-logo-img {
+  width: 82px;
+  height: 82px;
+
+  object-fit: contain;
+  display: block;
+
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.brand-large {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-large > span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-large strong {
+  margin: 0 !important;
+  line-height: 0.9 !important;
+}
+
+.brand-large small {
+  margin-top: 0 !important;
+  line-height: 1 !important;
+}
+
+/* ==========================================
+   COUPLE IMAGE - CENTER OF RIGHT HALF
+========================================== */
+
+.role-art-strip {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 20px !important;
+  margin: 0 !important;
+
+  box-sizing: border-box !important;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  overflow: visible !important;
+}
+
+.role-art-strip img {
+  width: auto !important;
+  height: auto !important;
+
+  max-width: 100% !important;
+  max-height: 100vh !important;
+
+  object-fit: contain !important;
+  display: block !important;
+  margin: auto !important;
+
+  /* LEFT + DOWN */
+  transform: translate(-250px, 60px) scale(1.25) !important;
+
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+/* ==========================================
+   REMOVE LOGIN MODAL ANIMATION
+========================================== */
+
+.auth-modal,
+.auth-modal-content,
+.auth-modal-box,
+.auth-panel,
+.auth-image,
+.auth-form {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* No hover movement */
+.auth-modal-content:hover,
+.auth-modal-box:hover,
+.auth-panel:hover {
+  transform: none !important;
+}
+
+/* No button animation */
+.auth-modal button {
+  transition: none !important;
+  transform: none !important;
+}
+
+.auth-modal button:hover,
+.auth-modal button:active {
+  transform: none !important;
+}
+
+/* ==========================================
+   CARETAKER - FULL GREEN COLOR PALETTE
+========================================== */
+
+.caretaker-auth .auth-role-pill {
+  background: #d9eedf !important;
+  color: #214f3b !important;
+}
+
+/* Tabs outer background */
+.caretaker-auth .auth-tabs {
+  background: #e8f2ea !important;
+}
+
+/* Active tab */
+.caretaker-auth .auth-tab.active {
+  background: #cfe8d7 !important;
+  color: #214f3b !important;
+}
+
+/* Inactive tab */
+.caretaker-auth .auth-tab {
+  color: #527060 !important;
+}
+
+/* Input */
+.caretaker-auth .field input {
+  background: #f7fbf8 !important;
+  border: 1.5px solid #c9dfd0 !important;
+}
+
+/* Input focus */
+.caretaker-auth .field input:focus {
+  border-color: #214f3b !important;
+  box-shadow: 0 0 0 4px rgba(33, 79, 59, 0.1) !important;
+}
+
+/* Input icons */
+.caretaker-auth .field-icon {
+  color: #4d7960 !important;
+}
+
+/* Password eye */
+.caretaker-auth .password-toggle {
+  color: #4d7960 !important;
+}
+
+/* Main button */
+.caretaker-auth .primary-btn {
+  background: #214f3b !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 8px 18px rgba(33, 79, 59, 0.2) !important;
+}
+
+/* Bottom links */
+.caretaker-auth .text-link {
+  color: #214f3b !important;
+}
+
+/* Checkbox */
+.caretaker-auth .terms-check input {
+  accent-color: #214f3b !important;
+}
+
+/* ==========================================
+   AUTH FORM - SAME BACKGROUND FOR BOTH
+========================================== */
+
+.auth-form-pane {
+  background-image: url("/home-bg.jpeg") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}

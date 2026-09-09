@@ -1,0 +1,1682 @@
+/* =========================================================
+   MANAS PATIENT DASHBOARD
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.dashboard-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+
+  background-image: url("/dashboard-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  color: #214f43;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* =========================================================
+   MAIN SHELL
+   ========================================================= */
+
+.dashboard-shell {
+  width: 100%;
+  height: 100vh;
+
+  padding: 25px 28px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* =========================================================
+   COMMON CARD
+   ========================================================= */
+
+.card {
+  background: rgba(255, 255, 255, 0.94);
+
+  border-radius: 25px;
+
+  border: 1px solid rgba(35, 75, 62, 0.06);
+
+  box-shadow: 0 7px 25px rgba(55, 74, 63, 0.08);
+}
+
+/* =========================================================
+   TOP NAVBAR
+   ========================================================= */
+
+.topbar {
+  width: 100%;
+  height: 100px;
+
+  flex-shrink: 0;
+
+  padding: 0 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LOGO */
+
+.brand {
+  border: none;
+  background: transparent;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  cursor: pointer;
+}
+
+.brand-logo-img {
+  width: 70px;
+  height: 70px;
+
+  object-fit: contain;
+}
+
+.brand span {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand strong {
+  color: #154c40;
+
+  font-size: 27px;
+  line-height: 1;
+
+  font-weight: 700;
+}
+
+.brand small {
+  margin-top: 7px;
+
+  color: #718279;
+
+  font-size: 13px;
+}
+
+/* NAV */
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.header-nav {
+  height: 46px;
+
+  border: none;
+  background: transparent;
+
+  padding: 0 13px;
+
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #164d41;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.header-nav span {
+  font-size: 19px;
+}
+
+.header-nav:hover {
+  background: rgba(221, 237, 228, 0.65);
+}
+
+/* =========================================================
+   MAIN DASHBOARD GRID
+   ========================================================= */
+
+.dashboard-grid {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    25fr
+    45fr
+    30fr;
+
+  gap: 20px;
+}
+
+.dashboard-grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* =========================================================
+   LEFT — CHOOSE GAME
+   ========================================================= */
+
+.game-panel {
+  padding: 27px 23px;
+
+  min-height: 0;
+
+  overflow: hidden;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #214f43;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.game-count {
+  color: #829088;
+
+  font-size: 12px;
+}
+
+/* GAME LIST */
+
+.game-list {
+  margin-top: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 13px;
+}
+
+/* GAME CARD */
+
+.game-card {
+  width: 100%;
+
+  min-height: 82px;
+
+  border: 1px solid rgba(45, 79, 67, 0.08);
+
+  border-radius: 19px;
+
+  padding: 10px 12px;
+
+  display: grid;
+
+  grid-template-columns:
+    57px
+    1fr
+    20px;
+
+  align-items: center;
+
+  gap: 10px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  transition: none;
+}
+
+/* REMOVE ANIMATION */
+
+.game-card,
+.game-card:hover,
+.game-card:active {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* GAME COLORS */
+
+.game-card:nth-child(1) {
+  background: #eee5fa;
+}
+
+.game-card:nth-child(2) {
+  background: #e3f1e7;
+}
+
+.game-card:nth-child(3) {
+  background: #fff0c9;
+}
+
+.game-card:nth-child(4) {
+  background: #f8e4e4;
+}
+
+.game-card:nth-child(5) {
+  background: #e1edf9;
+}
+
+/* SELECTED */
+
+.game-card.selected {
+  outline: 2px solid #a8bdb3;
+  outline-offset: 0;
+}
+
+/* ICON */
+
+.game-icon {
+  width: 53px;
+  height: 53px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  white-space: pre-line;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  line-height: 1;
+}
+
+.lavender-icon {
+  background: #ddd0f4;
+  color: #7257a4;
+}
+
+.mint-icon {
+  background: #cde8d6;
+  color: #357053;
+}
+
+.yellow-icon {
+  background: #f5dfa2;
+  color: #98751f;
+}
+
+.pink-icon {
+  background: #f1cccc;
+  color: #a35d5d;
+}
+
+.blue-icon {
+  background: #cbdff3;
+  color: #52769d;
+}
+
+/* TITLE */
+
+.game-title {
+  color: #244f43;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  line-height: 1.15;
+}
+
+.game-title span {
+  display: inline;
+}
+
+/* ARROW */
+
+.chevron {
+  color: #55756a;
+
+  font-size: 27px;
+
+  font-weight: 400;
+}
+
+/* =========================================================
+   CENTER — RECOMMENDED GAME
+   ========================================================= */
+
+.hero-panel {
+  position: relative;
+
+  min-height: 0;
+
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 25px;
+
+  background: #e9e0ca;
+}
+
+/* HERO IMAGE */
+
+.hero-bg-img {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  object-position: center;
+}
+
+/* OVERLAY */
+
+.hero-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  background: rgba(244, 237, 218, 0.58);
+}
+
+/* HERO CONTENT */
+
+.hero-content {
+  position: relative;
+
+  z-index: 2;
+
+  width: 100%;
+
+  padding: 30px 30px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  color: #154d41;
+}
+
+/* EYEBROW */
+
+.eyebrow {
+  margin: 0 0 12px;
+
+  color: #63766d;
+
+  font-size: 11px;
+
+  letter-spacing: 3px;
+
+  font-weight: 700;
+}
+
+/* GREETING */
+
+.hero-content h1 {
+  margin: 0;
+
+  color: #154d41;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: clamp(42px, 4vw, 56px);
+
+  line-height: 1;
+
+  font-weight: 600;
+}
+
+/* SUBTITLE */
+
+.hero-subtitle {
+  margin: 13px 0 26px;
+
+  color: #48665b;
+
+  font-size: 16px;
+}
+
+/* =========================================================
+   RECOMMENDATION CARD
+   ========================================================= */
+
+.recommendation-card {
+  width: min(500px, 90%);
+
+  min-height: 112px;
+
+  padding: 17px 20px;
+
+  border-radius: 19px;
+
+  background: rgba(255, 255, 255, 0.95);
+
+  display: flex;
+  align-items: center;
+
+  gap: 17px;
+
+  text-align: left;
+
+  box-shadow: 0 9px 25px rgba(61, 75, 65, 0.1);
+}
+
+.recommendation-icon {
+  width: 60px;
+  height: 60px;
+
+  flex-shrink: 0;
+
+  border-radius: 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  white-space: pre-line;
+
+  text-align: center;
+
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.recommendation-card h2 {
+  margin: 0 0 5px;
+
+  color: #244f43;
+
+  font-size: 18px;
+}
+
+.recommendation-card p {
+  margin: 0;
+
+  color: #718078;
+
+  font-size: 12px;
+
+  line-height: 1.4;
+}
+
+.weak-game-label {
+  display: inline-block;
+
+  margin-top: 6px;
+
+  color: #b45f3b;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+/* =========================================================
+   PLAY BUTTON
+   ========================================================= */
+
+.play-btn {
+  width: min(390px, 80%);
+
+  height: 55px;
+
+  margin-top: 19px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #c76238;
+
+  color: white;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 17px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 11px;
+}
+
+.play-btn:hover {
+  background: #b95730;
+}
+
+.play-btn span {
+  font-size: 20px;
+}
+
+/* =========================================================
+   RIGHT COLUMN
+   ========================================================= */
+
+.side-column {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 190px;
+
+  gap: 18px;
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   REMINDERS
+   ========================================================= */
+
+.reminders-card {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+
+  padding: 27px 23px;
+
+  overflow: hidden;
+}
+
+.motivation-card {
+  width: 100%;
+  height: 190px;
+  min-width: 0;
+  min-height: 190px;
+
+  padding: 18px 25px;
+
+  background: #e4f0e7;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  overflow: hidden;
+}
+
+.motivation-card p {
+  max-width: 330px;
+
+  margin: 7px 0;
+
+  color: #285648;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 17px;
+  line-height: 1.25;
+
+  font-style: italic;
+
+  text-align: center;
+}
+
+.thought-label {
+  margin: 0;
+
+  color: #627a6e;
+
+  font-size: 10px;
+
+  letter-spacing: 2px;
+
+  font-weight: 800;
+
+  text-align: center;
+}
+
+.quote-line {
+  width: 42px;
+  height: 2px;
+
+  margin: 4px auto 6px;
+
+  background: #7c9e8a;
+}
+
+.motivation-card strong {
+  display: block;
+
+  margin: 0;
+
+  color: #315d4d;
+
+  font-size: 12px;
+
+  text-align: center;
+}
+
+.thought-label {
+  margin-top: 3px;
+
+  color: #627a6e;
+
+  font-size: 10px;
+
+  letter-spacing: 2px;
+
+  font-weight: 800;
+
+  text-align: center;
+}
+
+.motivation-card strong {
+  color: #315d4d;
+
+  font-size: 12px;
+
+  text-align: center;
+}
+
+.quote-line {
+  width: 42px;
+  height: 2px;
+
+  background: #7c9e8a;
+
+  margin: 5px auto 9px;
+}
+
+.reminders-card .section-heading h2 {
+  font-size: 21px;
+}
+
+/* VIEW ALL */
+
+.view-all {
+  border: none;
+
+  background: transparent;
+
+  color: #315b4d;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.view-all span {
+  font-size: 19px;
+
+  margin-left: 2px;
+}
+
+/* REMINDER LIST */
+
+.reminder-list {
+  margin-top: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+/* REMINDER ROW */
+
+.reminder-row {
+  min-height: 50px;
+
+  padding: 7px 8px;
+
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+}
+
+.reminder-row:hover {
+  background: #f4f7f4;
+}
+
+.reminder-row input {
+  display: none;
+}
+
+/* CHECKBOX */
+
+.custom-checkbox {
+  width: 19px;
+  height: 19px;
+
+  flex-shrink: 0;
+
+  border: 1.5px solid #9db4a8;
+
+  border-radius: 5px;
+
+  position: relative;
+}
+
+.reminder-row input:checked + .custom-checkbox {
+  background: #315d4a;
+
+  border-color: #315d4a;
+}
+
+.reminder-row input:checked + .custom-checkbox::after {
+  content: "✓";
+
+  position: absolute;
+
+  left: 3px;
+  top: -2px;
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* REMINDER TEXT */
+
+.reminder-text {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.reminder-text strong {
+  color: #315345;
+
+  font-size: 12px;
+}
+
+.reminder-text small {
+  color: #87958f;
+
+  font-size: 10px;
+}
+
+.reminder-row.done strong {
+  color: #9da9a4;
+
+  text-decoration: line-through;
+}
+
+/* ADD REMINDER */
+
+.add-reminder-btn {
+  width: 100%;
+
+  height: 45px;
+
+  margin-top: 14px;
+
+  border: 1px dashed #9eb8aa;
+
+  border-radius: 11px;
+
+  background: rgba(248, 250, 247, 0.65);
+
+  color: #315d4d;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   DAILY THOUGHT
+   ========================================================= */
+
+.motivation-card {
+  flex: 0 0 205px;
+
+  min-height: 205px;
+
+  padding: 24px 27px;
+
+  background: #e4f0e7;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+/* LABEL */
+
+.thought-label {
+  margin-top: 3px;
+
+  color: #627a6e;
+
+  font-size: 10px;
+
+  letter-spacing: 2px;
+
+  font-weight: 800;
+}
+
+/* THOUGHT */
+
+.motivation-card p {
+  max-width: 340px;
+
+  margin: 12px 0;
+
+  color: #285648;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 21px;
+
+  line-height: 1.3;
+
+  font-style: italic;
+}
+
+/* LINE */
+
+.quote-line {
+  width: 42px;
+
+  height: 2px;
+
+  background: #7c9e8a;
+
+  margin-bottom: 9px;
+}
+
+.motivation-card strong {
+  color: #315d4d;
+
+  font-size: 12px;
+}
+
+.leaf-icon {
+  color: #648b76;
+
+  font-size: 21px;
+
+  margin-bottom: 2px;
+}
+
+/* =========================================================
+   MODALS
+   ========================================================= */
+
+.modal-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  background: rgba(27, 48, 39, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.profile-modal,
+.reminder-modal,
+.add-reminder-modal {
+  position: relative;
+
+  width: min(470px, 100%);
+
+  max-height: 88vh;
+
+  overflow-y: auto;
+
+  padding: 30px;
+
+  background: #fffdf8;
+}
+
+/* CLOSE */
+
+.modal-close {
+  position: absolute;
+
+  top: 14px;
+  right: 15px;
+
+  width: 34px;
+  height: 34px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #edf3ef;
+
+  color: #315345;
+
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+/* PROFILE */
+
+.profile-modal {
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+
+  margin: 3px auto 13px;
+
+  border-radius: 50%;
+
+  background: #dceee3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #315d4a;
+
+  font-size: 29px;
+}
+
+.profile-modal h2 {
+  margin: 0;
+
+  color: #244538;
+
+  font-size: 27px;
+}
+
+.profile-role {
+  color: #84938c;
+
+  font-size: 12px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin: 22px 0;
+}
+
+.profile-info div {
+  padding: 12px 14px;
+
+  border-radius: 11px;
+
+  background: #f3f7f4;
+
+  display: flex;
+  justify-content: space-between;
+
+  text-align: left;
+}
+
+.profile-info span {
+  color: #84958d;
+
+  font-size: 11px;
+}
+
+.profile-info strong {
+  color: #315345;
+
+  font-size: 11px;
+}
+
+.logout-btn {
+  width: 100%;
+
+  height: 44px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background: #b85d35;
+
+  color: white;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   REMINDER MODAL
+   ========================================================= */
+
+.modal-eyebrow {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #71867c;
+
+  font-size: 10px;
+
+  letter-spacing: 2px;
+
+  font-weight: 800;
+}
+
+.reminder-modal h2,
+.add-reminder-modal h2 {
+  margin: 0;
+
+  color: #244538;
+
+  font-size: 27px;
+}
+
+.all-reminders {
+  margin-top: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.full-reminder {
+  min-height: 57px;
+
+  padding: 7px 8px;
+
+  border-radius: 12px;
+
+  background: #f5f8f6;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.full-reminder label {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+}
+
+.full-reminder input {
+  display: none;
+}
+
+.full-reminder label > span:last-child {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.full-reminder strong {
+  color: #315345;
+
+  font-size: 12px;
+}
+
+.full-reminder small {
+  color: #879890;
+
+  font-size: 10px;
+}
+
+.delete-reminder {
+  width: 28px;
+  height: 28px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #b46b50;
+
+  font-size: 19px;
+
+  cursor: pointer;
+}
+
+.delete-reminder:hover {
+  background: #f5e7e2;
+}
+
+.modal-add-btn {
+  width: 100%;
+
+  height: 43px;
+
+  margin-top: 16px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background: #315d4a;
+
+  color: white;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   ADD REMINDER FORM
+   ========================================================= */
+
+.add-reminder-modal h2 {
+  margin-bottom: 22px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  margin-bottom: 15px;
+}
+
+.form-field span {
+  color: #4d685b;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.form-field input {
+  width: 100%;
+
+  height: 43px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cbdcd2;
+
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #f8fbf9;
+
+  color: #315345;
+}
+
+.form-field input:focus {
+  border-color: #315d4a;
+}
+
+.save-reminder-btn {
+  width: 100%;
+
+  height: 44px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background: #315d4a;
+
+  color: white;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .dashboard-shell {
+    padding: 18px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 30% 70%;
+  }
+
+  .side-column {
+    grid-column: 1 / -1;
+
+    display: grid;
+
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .dashboard-page {
+    overflow-y: auto;
+  }
+
+  .dashboard-shell {
+    height: auto;
+
+    min-height: 100vh;
+
+    padding: 12px;
+
+    gap: 13px;
+  }
+
+  .topbar {
+    height: 72px;
+
+    padding: 0 13px;
+  }
+
+  .brand-logo-img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .brand strong {
+    font-size: 20px;
+  }
+
+  .brand small {
+    display: none;
+  }
+
+  .header-nav {
+    padding: 0 7px;
+
+    font-size: 0;
+  }
+
+  .header-nav span {
+    font-size: 20px;
+  }
+
+  .dashboard-grid {
+    display: flex;
+
+    flex-direction: column;
+  }
+
+  .game-panel {
+    order: 2;
+
+    padding: 21px 15px;
+  }
+
+  .hero-panel {
+    order: 1;
+
+    min-height: 450px;
+  }
+
+  .side-column {
+    order: 3;
+
+    display: flex;
+  }
+
+  .reminders-card {
+    flex: none;
+
+    min-height: 300px;
+  }
+
+  .motivation-card {
+    flex: none;
+
+    min-height: 190px;
+  }
+
+  .hero-content {
+    padding: 25px 18px;
+  }
+
+  .hero-content h1 {
+    font-size: 38px;
+  }
+
+  .recommendation-card {
+    width: 94%;
+  }
+
+  .play-btn {
+    width: 90%;
+  }
+
+  .game-card {
+    min-height: 82px;
+  }
+}
+
+/* =========================================================
+   FINAL RIGHT COLUMN FIX
+   ========================================================= */
+
+@media (min-width: 1101px) {
+  .side-column {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+
+    overflow: hidden;
+  }
+
+  /* REMINDERS */
+  .reminders-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    flex: 1 1 auto;
+
+    min-height: 430px;
+
+    padding: 27px 23px;
+
+    overflow: hidden;
+  }
+
+  /* DAILY THOUGHT */
+  .motivation-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    flex: 0 0 205px;
+
+    height: 205px;
+    min-height: 205px;
+
+    padding: 24px 27px;
+
+    overflow: hidden;
+  }
+}
+
+/* =========================================================
+   RIGHT COLUMN - FINAL FIX
+   ========================================================= */
+
+@media (min-width: 1101px) {
+  .dashboard-grid {
+    height: calc(100vh - 173px);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .side-column {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-rows: minmax(0, 1fr) 210px;
+
+    gap: 18px;
+
+    overflow: hidden;
+  }
+
+  /* REMINDERS */
+  .reminders-card {
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    flex: none;
+
+    padding: 27px 23px;
+
+    overflow: hidden;
+  }
+
+  /* DAILY THOUGHT */
+  .motivation-card {
+    width: 100%;
+    height: 210px;
+
+    min-width: 0;
+    min-height: 0;
+
+    flex: none;
+
+    padding: 18px 25px;
+
+    background: #e4f0e7;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    overflow: hidden;
+  }
+
+  .motivation-card .leaf-icon {
+    display: none !important;
+  }
+
+  .motivation-card .thought-label {
+    margin: 0 0 8px;
+  }
+
+  .motivation-card p {
+    width: 100%;
+    max-width: 320px;
+
+    margin: 0 0 10px;
+
+    font-size: 18px;
+    line-height: 1.3;
+
+    text-align: center;
+  }
+
+  .motivation-card .quote-line {
+    width: 42px;
+    height: 2px;
+
+    margin: 2px auto 8px;
+  }
+
+  .motivation-card strong {
+    display: block;
+
+    margin: 0;
+
+    font-size: 12px;
+
+    text-align: center;
+  }
+}
+
+/* =========================================================
+   MANAS DASHBOARD BACKGROUND - FINAL
+   ========================================================= */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+html,
+body,
+#root {
+  background: transparent !important;
+}
+
+.dashboard-page {
+  width: 100% !important;
+  min-height: 100vh !important;
+
+  background-image: url("/dashboard-bg.png") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.dashboard-shell {
+  background: transparent !important;
+}
+
+/* =========================================================
+   HOME BACKGROUND - CLEARLY VISIBLE IN ALL BOXES
+   ========================================================= */
+
+.game-panel,
+.hero-panel,
+.reminders-card,
+.motivation-card {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
+    url("/home-bg.jpeg") !important;
+
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* CHOOSE GAME */
+.game-panel {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
+    url("/home-bg.jpeg") !important;
+}
+
+/* CENTER */
+.hero-panel {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15)),
+    url("/home-bg.jpeg") !important;
+}
+
+/* REMINDERS */
+.reminders-card {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
+    url("/home-bg.jpeg") !important;
+}
+
+/* DAILY THOUGHT */
+.motivation-card {
+  background-image:
+    linear-gradient(rgba(228, 240, 231, 0.18), rgba(228, 240, 231, 0.18)),
+    url("/home-bg.jpeg") !important;
+}
+
+.game-panel,
+.hero-panel,
+.reminders-card,
+.motivation-card {
+  background-image: url("/home-bg.jpeg") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* =========================================================
+   MANAS NAVBAR BACKGROUND
+   ========================================================= */
+
+.topbar {
+  background-image: url("/home-bg.jpeg") !important;
+
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
