@@ -76,35 +76,35 @@ const defaultReminders = [
   },
 ];
 
-function getTimeData() {
+const getTimeData = () => {
   const hour = new Date().getHours();
 
   if (hour >= 5 && hour < 12) {
     return {
       greeting: "Good Morning!",
-      background: "/assets/login-bg/morning-bg.jpg",
+      background: "/background-bg.png",
     };
   }
 
   if (hour >= 12 && hour < 17) {
     return {
       greeting: "Good Afternoon!",
-      background: "/assets/login-bg/afternoon-bg.jpg",
+      background: "/background-bg.png",
     };
   }
 
   if (hour >= 17 && hour < 21) {
     return {
       greeting: "Good Evening!",
-      background: "/assets/login-bg/evening-bg.jpg",
+      background: "/background1-bg.png",
     };
   }
 
   return {
     greeting: "Good Night!",
-    background: "/assets/login-bg/night-bg.jpg",
+    background: "/background1-bg.png",
   };
-}
+};
 
 function getDailyThought() {
   const today = new Date();
@@ -121,7 +121,7 @@ function PatientHome() {
 
   const [timeData, setTimeData] = useState(getTimeData());
 
-  const [selectedGame, setSelectedGame] = useState(games[0]);
+  const [selectedGame, setSelectedGame] = useState("");
 
   const [recommendedGame, setRecommendedGame] = useState(games[0]);
 
@@ -524,11 +524,11 @@ function PatientHome() {
             <div className="hero-overlay"></div>
 
             <div className="hero-content">
-              <p className="eyebrow">RECOMMENDED GAME</p>
-
               <h1>{timeData.greeting}</h1>
 
               <p className="hero-subtitle">Ready for a healthy mind today?</p>
+
+              <p className="eyebrow">RECOMMENDED GAME</p>
 
               <div className="recommendation-card">
                 <span

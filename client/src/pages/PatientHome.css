@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:opsz,wght@18..144,400;18..144,500;18..144,600;18..144,700&display=swap");
+
 /* =========================================================
    MANAS PATIENT DASHBOARD
    ========================================================= */
@@ -15,10 +17,18 @@ body {
   min-height: 100vh;
   overflow: hidden;
 
-  background-image: url("/dashboard-bg.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(255, 255, 255, 0.68) 0%,
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(207, 221, 201, 0.42) 0%,
+      transparent 30%
+    ),
+    linear-gradient(135deg, #e9ddc6 0%, #f5ecdc 48%, #e5d8be 100%);
 
   color: #214f43;
   font-family: Georgia, "Times New Roman", serif;
@@ -407,10 +417,10 @@ body {
 
 .hero-overlay {
   position: absolute;
-
   inset: 0;
-
-  background: rgba(244, 237, 218, 0.58);
+  background:
+    linear-gradient(rgba(235, 244, 235, 0.6), rgba(222, 238, 226, 0.65)),
+    url("/patient-bg.png") !important;
 }
 
 /* HERO CONTENT */
@@ -1583,100 +1593,528 @@ body {
 }
 
 /* =========================================================
-   MANAS DASHBOARD BACKGROUND - FINAL
+   MANAS GRADIENT BACKGROUND - FINAL
    ========================================================= */
 
-html,
-body,
-#root {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-}
-
-html,
-body,
-#root {
-  background: transparent !important;
-}
-
+/* Main page */
 .dashboard-page {
   width: 100% !important;
   min-height: 100vh !important;
+  overflow: hidden;
 
-  background-image: url("/dashboard-bg.png") !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
+  background:
+    radial-gradient(
+      circle at 8% 18%,
+      rgba(255, 255, 255, 0.72) 0%,
+      transparent 27%
+    ),
+    radial-gradient(
+      circle at 92% 82%,
+      rgba(207, 221, 201, 0.45) 0%,
+      transparent 30%
+    ),
+    linear-gradient(135deg, #e9ddc6 0%, #f5ecdc 48%, #e5d8be 100%) !important;
 }
 
+/* Keep shell transparent so the page gradient remains visible */
 .dashboard-shell {
   background: transparent !important;
 }
 
-/* =========================================================
-   HOME BACKGROUND - CLEARLY VISIBLE IN ALL BOXES
-   ========================================================= */
+/* Navbar */
+.topbar {
+  background: linear-gradient(
+    135deg,
+    #fffdf8 0%,
+    #faf4e9 48%,
+    #f1e8d7 100%
+  ) !important;
 
-.game-panel,
-.hero-panel,
-.reminders-card,
-.motivation-card {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
-    url("/home-bg.jpeg") !important;
-
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
+  background-image: none !important;
 }
 
-/* CHOOSE GAME */
+/* Left game panel */
 .game-panel {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
-    url("/home-bg.jpeg") !important;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 253, 248, 0.98) 0%,
+    rgba(248, 241, 228, 0.96) 100%
+  ) !important;
+
+  background-image: none !important;
 }
 
-/* CENTER */
+/* Center hero:
+   React already supplies morning/afternoon/evening/night image
+   through .hero-bg-img, so do NOT remove that image. */
 .hero-panel {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15)),
-    url("/home-bg.jpeg") !important;
+  background: #243f4d !important;
+  overflow: hidden;
 }
 
-/* REMINDERS */
+.hero-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 43, 58, 0.05) 0%,
+    rgba(20, 43, 58, 0.18) 55%,
+    rgba(15, 38, 49, 0.3) 100%
+  ) !important;
+}
+
+/* Recommendation card */
+.recommendation-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 253, 249, 0.98),
+    rgba(248, 241, 230, 0.97)
+  ) !important;
+}
+
+/* Reminders */
 .reminders-card {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
-    url("/home-bg.jpeg") !important;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 253, 248, 0.98) 0%,
+    rgba(248, 241, 228, 0.96) 100%
+  ) !important;
+
+  background-image: none !important;
 }
 
-/* DAILY THOUGHT */
+/* Daily thought */
 .motivation-card {
+  background:
+    radial-gradient(
+      circle at 90% 20%,
+      rgba(255, 255, 255, 0.58) 0%,
+      transparent 30%
+    ),
+    linear-gradient(145deg, #f2f1e4 0%, #e4f0e7 55%, #dcebdd 100%) !important;
+
   background-image:
-    linear-gradient(rgba(228, 240, 231, 0.18), rgba(228, 240, 231, 0.18)),
-    url("/home-bg.jpeg") !important;
+    radial-gradient(
+      circle at 90% 20%,
+      rgba(255, 255, 255, 0.58) 0%,
+      transparent 30%
+    ),
+    linear-gradient(145deg, #f2f1e4 0%, #e4f0e7 55%, #dcebdd 100%) !important;
 }
 
-.game-panel,
-.hero-panel,
-.reminders-card,
-.motivation-card {
-  background-image: url("/home-bg.jpeg") !important;
+/* =========================================================
+   RESPONSIVE GRADIENT FIX
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .dashboard-page {
+    overflow-y: auto;
+    background:
+      radial-gradient(
+        circle at 15% 10%,
+        rgba(255, 255, 255, 0.72) 0%,
+        transparent 30%
+      ),
+      linear-gradient(160deg, #e9ddc6 0%, #f5ecdc 50%, #e5d8be 100%) !important;
+  }
+}
+
+/* =========================================================
+   DASHBOARD BG INSIDE ALL BOXES
+========================================================= */
+
+.game-panel {
+  background:
+    linear-gradient(rgba(255, 253, 248, 0.65), rgba(248, 241, 228, 0.65)),
+    url("/patient-bg.png") !important;
+
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
 }
 
-/* =========================================================
-   MANAS NAVBAR BACKGROUND
-   ========================================================= */
+.reminders-card {
+  background:
+    linear-gradient(rgba(255, 253, 248, 0.65), rgba(248, 241, 228, 0.65)),
+    url("/patient-bg.png") !important;
+
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.motivation-card {
+  background:
+    linear-gradient(rgba(235, 244, 235, 0.6), rgba(222, 238, 226, 0.65)),
+    url("/patient-bg.png") !important;
+
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
 
 .topbar {
-  background-image: url("/home-bg.jpeg") !important;
+  background:
+    linear-gradient(rgba(255, 253, 248, 0.72), rgba(248, 241, 228, 0.72)),
+    url("/patient-bg.png") !important;
 
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
+}
+
+/* =========================================================
+   FONT STYLE — MANAS / MERRIWEATHER SERIF
+   Inspired by the provided MANAS design
+========================================================= */
+
+/* Overall dashboard typography */
+.dashboard-page {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  color: #24352b;
+}
+
+/* Navbar */
+.topbar,
+.brand,
+.header-nav,
+.top-actions {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+}
+
+.brand strong {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.brand small {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Navigation */
+.header-nav {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+}
+
+/* Section headings */
+.section-heading,
+.section-heading h2,
+.reminders-card .section-heading h2 {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-weight: 700 !important;
+}
+
+.section-heading h2,
+.reminders-card .section-heading h2 {
+  font-size: 23px !important;
+}
+
+/* Game count */
+.game-count {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 15px !important;
+  font-weight: 500;
+}
+
+/* Game cards */
+.game-card {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+}
+
+.game-title {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 1.15;
+}
+
+.game-icon {
+  font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif !important;
+}
+
+/* Hero */
+.hero-content {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+}
+
+.eyebrow {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 12px !important;
+  letter-spacing: 3px;
+  font-weight: 700;
+}
+
+.hero-content h1 {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: clamp(48px, 4vw, 60px) !important;
+  line-height: 0.95;
+  font-weight: 600 !important;
+  letter-spacing: -0.4px;
+}
+
+.hero-subtitle {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 18px !important;
+  font-weight: 500;
+}
+
+/* Recommendation card */
+.recommendation-card,
+.recommendation-card h2,
+.recommendation-card p,
+.weak-game-label {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+}
+
+.recommendation-card h2 {
+  font-size: 21px !important;
+  font-weight: 700 !important;
+}
+
+.recommendation-card p {
+  font-size: 15px !important;
+  font-weight: 500;
+}
+
+.weak-game-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+}
+
+/* Play button */
+.play-btn {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 19px !important;
+  font-weight: 700 !important;
+}
+
+/* Reminders */
+.view-all,
+.reminder-text,
+.reminder-text strong,
+.reminder-text small,
+.add-reminder-btn {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+}
+
+.view-all {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.reminder-text strong {
+  font-size: 15px !important;
+  font-weight: 600;
+}
+
+.reminder-text small {
+  font-size: 12px !important;
+}
+
+/* Add reminder */
+.add-reminder-btn {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+/* Daily thought */
+.thought-label {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 11px !important;
+  letter-spacing: 2.5px;
+  font-weight: 700 !important;
+}
+
+.motivation-card p {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 23px !important;
+  font-weight: 500 !important;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.motivation-card strong {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* Modals */
+.profile-modal,
+.reminder-modal,
+.add-reminder-modal,
+.profile-modal h2,
+.reminder-modal h2,
+.add-reminder-modal h2,
+.form-field,
+.form-field input,
+.form-field span,
+.modal-eyebrow,
+.modal-add-btn,
+.save-reminder-btn,
+.logout-btn {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+}
+
+.profile-modal h2,
+.reminder-modal h2,
+.add-reminder-modal h2 {
+  font-size: 29px !important;
+  font-weight: 700 !important;
+}
+
+/* Keep form controls readable */
+.form-field input {
+  font-size: 16px !important;
+  font-weight: 500;
+}
+
+.form-field span,
+.modal-eyebrow {
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+/* Buttons */
+button {
+  font-family: "Merriweather", Georgia, "Times New Roman", serif !important;
+}
+
+/* =========================================
+   PATIENT BACKGROUND — BLENDED LOOK
+   ========================================= */
+
+.hero-panel {
+  background: #eee7d7 !important;
+  border: 1px solid rgba(35, 75, 62, 0.1) !important;
+  box-shadow: 0 7px 25px rgba(55, 74, 63, 0.08) !important;
+}
+
+/* Patient background image */
+.hero-bg-img {
+  opacity: 0.72 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* Warm transparent layer to blend image */
+.hero-overlay {
+  background: rgba(245, 239, 222, 0.28) !important;
+}
+
+/* Keep content crisp */
+.hero-content {
+  position: relative;
+  z-index: 3;
+}
+
+/* =========================================
+   RECOMMENDED MEMORY PUZZLES
+   MOUNTAIN BACKGROUND
+   ========================================= */
+
+.hero-panel .recommendation-card:has(.lavender-icon) {
+  background-image:
+    linear-gradient(rgba(255, 253, 249, 0.45), rgba(248, 241, 230, 0.45)),
+    url("/mountain.png") !important;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* =========================================
+   RECOMMENDED GAME ORDER + BOTTOM POSITION
+   ========================================= */
+
+.hero-content {
+  height: 100% !important;
+  padding: 45px 30px 55px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+/* =========================================
+   RECOMMENDED SECTION - MORE DOWN
+   ========================================= */
+
+.hero-content {
+  height: 100% !important;
+  padding: 45px 30px 55px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+/* Good Morning */
+.hero-content h1 {
+  order: 1 !important;
+  margin: 0 !important;
+}
+
+/* Subtitle */
+.hero-content .hero-subtitle {
+  order: 2 !important;
+  margin: 13px 0 0 !important;
+}
+
+/* Recommended Game - move further down */
+.hero-content .eyebrow {
+  order: 3 !important;
+  margin-top: 220px !important;
+  margin-bottom: 14px !important;
+}
+
+/* Memory Puzzles */
+.hero-content .recommendation-card {
+  order: 4 !important;
+  margin: 0 !important;
+}
+
+/* Play Now */
+.hero-content .play-btn {
+  order: 5 !important;
+  margin-top: 18px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove selected/green highlight */
+.game-card.selected {
+  background: #eee5fa !important;
+  border: 1px solid rgba(35, 75, 62, 0.08) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.game-card.selected::before,
+.game-card.selected::after {
+  display: none !important;
+}
+
+/* Remove Play Now animation */
+.play-btn {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Remove hover animation */
+.play-btn:hover {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Remove click/active animation */
+.play-btn:active {
+  animation: none !important;
+  transform: none !important;
 }

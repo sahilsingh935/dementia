@@ -1665,7 +1665,7 @@ button {
   margin: auto !important;
 
   /* LEFT + DOWN */
-  transform: translate(-250px, 60px) scale(1.25) !important;
+  transform: translate(-180px, 170px) scale(1.75) !important;
 
   border: none !important;
   box-shadow: none !important;
