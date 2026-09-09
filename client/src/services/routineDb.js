@@ -1,6 +1,22 @@
 const DB_NAME = "SmritiSetuDB";
 const STORE_NAME = "routineResults";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
+
+// ======================================
+// GET CURRENT PATIENT
+// ======================================
+
+function getCurrentPatientId() {
+  return (
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null
+  );
+}
+
+// ======================================
+// OPEN DATABASE
+// ======================================
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -16,6 +32,11 @@ function openDB() {
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
+      const transaction = event.target.transaction;
+
+      // ======================================
+      // CREATE STORE
+      // ======================================
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, {
@@ -30,13 +51,53 @@ function openDB() {
         store.createIndex("playedAt", "playedAt", {
           unique: false,
         });
+
+        store.createIndex("patientKey", "patientKey", {
+          unique: false,
+        });
+      }
+
+      // ======================================
+      // EXISTING STORE UPGRADE
+      // ======================================
+      else {
+        const store = transaction.objectStore(STORE_NAME);
+
+        if (!store.indexNames.contains("synced")) {
+          store.createIndex("synced", "synced", {
+            unique: false,
+          });
+        }
+
+        if (!store.indexNames.contains("playedAt")) {
+          store.createIndex("playedAt", "playedAt", {
+            unique: false,
+          });
+        }
+
+        if (!store.indexNames.contains("patientKey")) {
+          store.createIndex("patientKey", "patientKey", {
+            unique: false,
+          });
+        }
       }
     };
   });
 }
 
-// Save Routine Game result
+// ======================================
+// SAVE ROUTINE GAME RESULT
+// ======================================
+
 export async function saveRoutineResult(result) {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    console.error("No logged-in patient found. Routine result not saved.");
+
+    throw new Error("Patient authentication required.");
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -47,7 +108,21 @@ export async function saveRoutineResult(result) {
     const data = {
       ...result,
 
+      // ======================================
+      // PATIENT IDENTIFICATION
+      // ======================================
+
+      patientKey,
+
+      // ======================================
+      // GAME INFORMATION
+      // ======================================
+
       gameType: "routine",
+
+      // ======================================
+      // SYNC
+      // ======================================
 
       synced: false,
 
@@ -57,6 +132,11 @@ export async function saveRoutineResult(result) {
     const request = store.add(data);
 
     request.onsuccess = () => {
+      console.log("Routine result saved locally:", {
+        id: request.result,
+        patientKey,
+      });
+
       resolve(request.result);
     };
 
@@ -66,8 +146,19 @@ export async function saveRoutineResult(result) {
   });
 }
 
-// Get all unsynced Routine results
+// ======================================
+// GET UNSYNCED ROUTINE RESULTS
+// ======================================
+
 export async function getUnsyncedRoutineResults() {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    console.log("No logged-in patient - Routine sync skipped.");
+
+    return [];
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -80,7 +171,16 @@ export async function getUnsyncedRoutineResults() {
     request.onsuccess = () => {
       const results = request.result || [];
 
-      resolve(results.filter((item) => item.synced === false));
+      /*
+          Sirf current patient ke
+          unsynced results return honge.
+        */
+
+      const patientResults = results.filter(
+        (item) => item.synced === false && item.patientKey === patientKey,
+      );
+
+      resolve(patientResults);
     };
 
     request.onerror = () => {
@@ -89,7 +189,10 @@ export async function getUnsyncedRoutineResults() {
   });
 }
 
-// Mark one result as synced
+// ======================================
+// MARK ROUTINE RESULT AS SYNCED
+// ======================================
+
 export async function markRoutineResultSynced(id) {
   const db = await openDB();
 
@@ -127,8 +230,17 @@ export async function markRoutineResultSynced(id) {
   });
 }
 
-// Get all Routine results
+// ======================================
+// GET ALL ROUTINE RESULTS
+// ======================================
+
 export async function getAllRoutineResults() {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    return [];
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -139,7 +251,14 @@ export async function getAllRoutineResults() {
     const request = store.getAll();
 
     request.onsuccess = () => {
-      resolve(request.result || []);
+      const results = request.result || [];
+
+      /*
+          Patient ko sirf apne
+          Routine results milenge.
+        */
+
+      resolve(results.filter((item) => item.patientKey === patientKey));
     };
 
     request.onerror = () => {

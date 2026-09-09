@@ -1,65 +1,191 @@
 import {
-  getUnsyncedRecognitionResults,
-  markRecognitionResultSynced,
-} from "./recognitionDb";
+  getUnsyncedRecallSequenceResults,
+  markRecallSequenceSynced,
+} from "./recallSequenceDb";
 
-const API_URL = "http://localhost:5000/api/recognition";
+const API_URL = "http://localhost:5000/api/recall-sequence";
 
 // ======================================
-// SYNC RECOGNITION RESULTS
+// GET AUTH
 // ======================================
 
-export async function syncRecognitionResults() {
-  // Internet nahi hai
+function getAuth() {
+  const token =
+    localStorage.getItem("manasToken") ||
+    sessionStorage.getItem("manasToken") ||
+    null;
+
+  const role =
+    localStorage.getItem("manasRole") ||
+    sessionStorage.getItem("manasRole") ||
+    null;
+
+  const userId =
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null;
+
+  return {
+    token,
+    role,
+    userId,
+  };
+}
+
+// ======================================
+// SYNC RECALL SEQUENCE RESULTS
+// ======================================
+
+export async function syncRecallSequenceResults() {
+  // --------------------------------------
+  // OFFLINE CHECK
+  // --------------------------------------
+
   if (!navigator.onLine) {
-    console.log("Offline - Recognition results will sync later.");
+    console.log("Offline - Recall Sequence sync skipped.");
+    return;
+  }
+
+  // --------------------------------------
+  // AUTH CHECK
+  // --------------------------------------
+
+  const { token, role, userId } = getAuth();
+
+  // Sirf authenticated patient sync karega
+  if (!token || role !== "patient" || !userId) {
+    console.log(
+      "No authenticated patient session - Recall Sequence sync skipped.",
+    );
     return;
   }
 
   try {
-    const results = await getUnsyncedRecognitionResults();
+    // --------------------------------------
+    // GET UNSYNCED RESULTS
+    // --------------------------------------
 
-    if (results.length === 0) {
-      console.log("No unsynced recognition results.");
+    const results = await getUnsyncedRecallSequenceResults();
+
+    if (!results.length) {
+      console.log("No unsynced Recall Sequence results.");
       return;
     }
 
-    console.log(`Syncing ${results.length} recognition result(s)...`);
+    // --------------------------------------
+    // CURRENT PATIENT ONLY
+    // --------------------------------------
 
-    for (const result of results) {
+    const patientResults = results.filter(
+      (result) => result.patientKey === userId,
+    );
+
+    if (!patientResults.length) {
+      console.log("No unsynced Recall Sequence results for current patient.");
+      return;
+    }
+
+    console.log(
+      `Syncing ${patientResults.length} Recall Sequence result(s)...`,
+    );
+
+    // --------------------------------------
+    // SYNC EACH RESULT
+    // --------------------------------------
+
+    for (const result of patientResults) {
       try {
-        // IndexedDB ke internal fields remove karo
-        const { id, synced, ...data } = result;
+        /*
+         * IndexedDB ke internal fields
+         * backend ko nahi bhejne.
+         *
+         * patientId backend JWT se
+         * automatically determine karega.
+         */
+
+        const { id, synced, patientKey, createdAt, ...gameData } = result;
+
+        // --------------------------------------
+        // API REQUEST
+        // --------------------------------------
 
         const response = await fetch(`${API_URL}/save`, {
           method: "POST",
 
           headers: {
             "Content-Type": "application/json",
+
+            Authorization: `Bearer ${token}`,
           },
 
-          body: JSON.stringify(data),
+          body: JSON.stringify(gameData),
         });
 
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
+        // --------------------------------------
+        // AUTH EXPIRED
+        // --------------------------------------
+
+        if (response.status === 401) {
+          throw new Error("Authentication expired");
         }
 
-        // MongoDB mein successfully save hone ke baad
-        // IndexedDB mein synced = true
-        await markRecognitionResultSynced(id);
+        // --------------------------------------
+        // PERMISSION DENIED
+        // --------------------------------------
 
-        console.log(`Recognition result ${id} synced successfully.`);
+        if (response.status === 403) {
+          throw new Error("Permission denied");
+        }
+
+        // --------------------------------------
+        // SERVER ERROR
+        // --------------------------------------
+
+        if (!response.ok) {
+          let errorMessage = `Server returned ${response.status}`;
+
+          try {
+            const errorData = await response.json();
+
+            if (errorData?.message) {
+              errorMessage = errorData.message;
+            }
+          } catch {
+            // JSON response unavailable
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        // --------------------------------------
+        // SUCCESS
+        // --------------------------------------
+
+        /*
+         * Backend mein successfully save
+         * hone ke baad hi synced=true.
+         */
+
+        await markRecallSequenceSynced(id);
+
+        console.log(`Recall Sequence result ${id} synced successfully.`);
       } catch (error) {
-        console.error(`Failed to sync recognition result ${result.id}:`, error);
+        console.error(
+          `Failed to sync Recall Sequence result ${result.id}:`,
+          error.message,
+        );
 
-        // Agar ek result fail hua,
-        // baaki results ko try karenge
+        /*
+         * Result IndexedDB se delete nahi hoga.
+         * synced=false rahega.
+         * Next sync mein retry hoga.
+         */
+
         continue;
       }
     }
   } catch (error) {
-    console.error("Recognition sync error:", error);
+    console.error("Recall Sequence sync error:", error);
   }
 }
 
@@ -67,25 +193,39 @@ export async function syncRecognitionResults() {
 // AUTOMATIC SYNC
 // ======================================
 
-export function startRecognitionAutoSync() {
-  // App start hote hi sync try karo
-  syncRecognitionResults();
+export function startRecallSequenceAutoSync() {
+  // --------------------------------------
+  // 1. APP START
+  // --------------------------------------
 
-  // Internet wapas aane par sync
+  syncRecallSequenceResults();
+
+  // --------------------------------------
+  // 2. INTERNET RESTORED
+  // --------------------------------------
+
   const handleOnline = () => {
-    console.log("Internet restored.");
+    console.log("Internet restored - syncing Recall Sequence...");
 
-    syncRecognitionResults();
+    syncRecallSequenceResults();
   };
 
   window.addEventListener("online", handleOnline);
 
-  // Har 30 seconds mein check
+  // --------------------------------------
+  // 3. EVERY 30 SECONDS
+  // --------------------------------------
+
   const interval = setInterval(() => {
-    syncRecognitionResults();
+    if (navigator.onLine) {
+      syncRecallSequenceResults();
+    }
   }, 30000);
 
-  // Cleanup
+  // --------------------------------------
+  // CLEANUP
+  // --------------------------------------
+
   return () => {
     window.removeEventListener("online", handleOnline);
 

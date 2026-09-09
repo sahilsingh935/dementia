@@ -3,6 +3,18 @@ import { dbPromise } from "../../services/db";
 import "./MemoryGame.css";
 
 // =========================
+// AUTH
+// =========================
+
+function getLoggedInPatientId() {
+  return (
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null
+  );
+}
+
+// =========================
 // LOAD CULTURAL IMAGES
 // =========================
 
@@ -172,47 +184,42 @@ function MemoryGame() {
 
     const totalAttempts = moves;
 
-    // Raw accuracy
+    // Accuracy = correctly matched pairs / total pairs
     const accuracy =
-      totalAttempts > 0 ? (matchedPairs / totalAttempts) * 100 : 0;
+      totalPairs > 0 ? Math.min(100, (matchedPairs / totalPairs) * 100) : 0;
 
     const mistakes = Math.max(0, totalAttempts - matchedPairs);
 
     const finalLaterAttempts = laterAttemptsRef.current;
+
     const finalLaterMistakes = laterMistakesRef.current;
 
-    // =========================================
-    // PERFORMANCE SCORE
-    // =========================================
-
-    /*
-      Early learning mistakes are NOT punished.
-
-      Only later mistakes affect mistake score.
-    */
-
+    // Performance score
     const timeScore = Math.max(0, 100 - seconds * 3);
 
     const mistakeScore = Math.max(0, 100 - finalLaterMistakes * 15);
 
-    const score = accuracy * 0.6 + timeScore * 0.2 + mistakeScore * 0.2;
+    const rawScore = accuracy * 0.6 + timeScore * 0.2 + mistakeScore * 0.2;
 
-    return {
+    const performance = {
       matchedPairs,
       totalPairs,
+      totalAttempts,
 
       accuracy: Number(accuracy.toFixed(2)),
 
       mistakes,
 
-      totalAttempts,
-
       laterAttempts: finalLaterAttempts,
 
       laterMistakes: finalLaterMistakes,
 
-      score: Number(score.toFixed(2)),
+      score: Number(Math.min(100, Math.max(0, rawScore)).toFixed(2)),
     };
+
+    console.log("Memory Performance Generated:", performance);
+
+    return performance;
   };
 
   // =========================================
@@ -324,17 +331,35 @@ function MemoryGame() {
   }) => {
     if (resultSavedRef.current) return;
 
+    const patientKey = getLoggedInPatientId();
+
+    // Game result sirf logged-in patient ke liye save hoga
+    if (!patientKey) {
+      console.error("No logged-in patient found. Game result not saved.");
+      return;
+    }
+
     resultSavedRef.current = true;
 
     try {
       const db = await dbPromise;
 
       await db.add("gameResults", {
+        // =========================
+        // PATIENT IDENTIFICATION
+        // =========================
+
+        patientKey,
+
+        // =========================
+        // GAME INFORMATION
+        // =========================
+
         game: "memory",
 
         state: selectedState,
 
-        level: level,
+        level,
 
         moves: finalMoves,
 
@@ -346,7 +371,10 @@ function MemoryGame() {
 
         score: finalScore,
 
-        // Adaptive difficulty data
+        // =========================
+        // ADAPTIVE DIFFICULTY DATA
+        // =========================
+
         totalAttempts: finalTotalAttempts,
 
         laterAttempts: finalLaterAttempts,
@@ -355,6 +383,10 @@ function MemoryGame() {
 
         difficultyChange: prediction,
 
+        // =========================
+        // SYNC INFORMATION
+        // =========================
+
         completed: true,
 
         synced: false,
@@ -362,13 +394,16 @@ function MemoryGame() {
         createdAt: new Date().toISOString(),
       });
 
-      console.log(
-        `Level ${level} result saved with ML prediction: ${prediction}`,
-      );
+      console.log("Memory result saved locally:", {
+        patientKey,
+        level,
+        score: finalScore,
+        difficultyChange: prediction,
+      });
     } catch (error) {
       resultSavedRef.current = false;
 
-      console.error("Failed to save game result:", error);
+      console.error("Failed to save memory game result:", error);
     }
   };
 

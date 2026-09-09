@@ -1,19 +1,77 @@
 const DB_NAME = "SmritiSetuRecallSequenceDB";
 const STORE_NAME = "recallSequenceResults";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+
+// ======================================
+// GET CURRENT PATIENT
+// ======================================
+
+function getCurrentPatientId() {
+  return (
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null
+  );
+}
+
+// ======================================
+// OPEN DATABASE
+// ======================================
 
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onupgradeneeded = () => {
-      const db = request.result;
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      const transaction = event.target.transaction;
+
+      // ======================================
+      // CREATE STORE
+      // ======================================
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, {
+        const store = db.createObjectStore(STORE_NAME, {
           keyPath: "id",
           autoIncrement: true,
         });
+
+        store.createIndex("synced", "synced", {
+          unique: false,
+        });
+
+        store.createIndex("createdAt", "createdAt", {
+          unique: false,
+        });
+
+        store.createIndex("patientKey", "patientKey", {
+          unique: false,
+        });
+      }
+
+      // ======================================
+      // UPGRADE EXISTING STORE
+      // ======================================
+      else {
+        const store = transaction.objectStore(STORE_NAME);
+
+        if (!store.indexNames.contains("synced")) {
+          store.createIndex("synced", "synced", {
+            unique: false,
+          });
+        }
+
+        if (!store.indexNames.contains("createdAt")) {
+          store.createIndex("createdAt", "createdAt", {
+            unique: false,
+          });
+        }
+
+        if (!store.indexNames.contains("patientKey")) {
+          store.createIndex("patientKey", "patientKey", {
+            unique: false,
+          });
+        }
       }
     };
 
@@ -27,8 +85,21 @@ function openDB() {
   });
 }
 
+// ======================================
 // SAVE RESULT
+// ======================================
+
 export async function saveRecallSequenceResult(data) {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    console.error(
+      "No logged-in patient found. Recall Sequence result not saved.",
+    );
+
+    throw new Error("Patient authentication required.");
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -38,11 +109,32 @@ export async function saveRecallSequenceResult(data) {
 
     const request = store.add({
       ...data,
+
+      // ======================================
+      // PATIENT IDENTIFICATION
+      // ======================================
+
+      patientKey,
+
+      // ======================================
+      // SYNC
+      // ======================================
+
       synced: false,
+
+      // ======================================
+      // TIMESTAMP
+      // ======================================
+
       createdAt: new Date().toISOString(),
     });
 
     request.onsuccess = () => {
+      console.log("Recall Sequence result saved locally:", {
+        id: request.result,
+        patientKey,
+      });
+
       resolve(request.result);
     };
 
@@ -52,8 +144,19 @@ export async function saveRecallSequenceResult(data) {
   });
 }
 
+// ======================================
 // GET UNSYNCED RESULTS
+// ======================================
+
 export async function getUnsyncedRecallSequenceResults() {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    console.log("No logged-in patient - Recall Sequence sync skipped.");
+
+    return [];
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -64,7 +167,11 @@ export async function getUnsyncedRecallSequenceResults() {
     const request = store.getAll();
 
     request.onsuccess = () => {
-      const unsynced = request.result.filter((item) => item.synced === false);
+      const results = request.result || [];
+
+      const unsynced = results.filter(
+        (item) => item.synced === false && item.patientKey === patientKey,
+      );
 
       resolve(unsynced);
     };
@@ -75,7 +182,10 @@ export async function getUnsyncedRecallSequenceResults() {
   });
 }
 
+// ======================================
 // MARK RESULT AS SYNCED
+// ======================================
+
 export async function markRecallSequenceSynced(id) {
   const db = await openDB();
 

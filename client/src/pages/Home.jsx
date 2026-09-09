@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
+const API_URL = "http://localhost:5000/api";
+const CAREGIVER_URL = "http://localhost:5174/caretaker";
+
 export default function Home() {
   const navigate = useNavigate();
 
@@ -9,8 +12,17 @@ export default function Home() {
   const [selectedRole, setSelectedRole] = useState("patient");
   const [authMode, setAuthMode] = useState("login");
 
+  // ==========================================
+  // PATIENT
+  // ==========================================
+
   const [patientId, setPatientId] = useState("");
   const [patientPassword, setPatientPassword] = useState("");
+  const [rememberDevice, setRememberDevice] = useState(false);
+
+  // ==========================================
+  // CARETAKER
+  // ==========================================
 
   const [caretakerEmail, setCaretakerEmail] = useState("");
   const [caretakerPassword, setCaretakerPassword] = useState("");
@@ -20,13 +32,22 @@ export default function Home() {
   const [caretakerSignupPassword, setCaretakerSignupPassword] = useState("");
   const [caretakerTerms, setCaretakerTerms] = useState(false);
 
+  // ==========================================
+  // PASSWORD VISIBILITY
+  // ==========================================
+
   const [showPatientPassword, setShowPatientPassword] = useState(false);
 
   const [showCaretakerPassword, setShowCaretakerPassword] = useState(false);
 
   const [showSignupPassword, setShowSignupPassword] = useState(false);
 
+  // ==========================================
+  // UI
+  // ==========================================
+
   const [toast, setToast] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // ==========================================
   // OPEN AUTH MODAL
@@ -59,95 +80,202 @@ export default function Home() {
   }
 
   // ==========================================
+  // SAVE AUTH SESSION
+  // ==========================================
+
+  function saveAuthSession(token, user, remember) {
+    // Clear old session
+    localStorage.removeItem("manasToken");
+    localStorage.removeItem("manasRole");
+    localStorage.removeItem("manasUser");
+    localStorage.removeItem("manasUserId");
+    localStorage.removeItem("manasUsername");
+
+    sessionStorage.removeItem("manasToken");
+    sessionStorage.removeItem("manasRole");
+    sessionStorage.removeItem("manasUser");
+    sessionStorage.removeItem("manasUserId");
+    sessionStorage.removeItem("manasUsername");
+
+    const storage = remember ? localStorage : sessionStorage;
+
+    const userId = user?.id || user?._id || "";
+
+    storage.setItem("manasToken", token);
+
+    storage.setItem("manasRole", user.role);
+
+    storage.setItem("manasUser", user.name || "");
+
+    storage.setItem("manasUserId", userId);
+
+    if (user.username) {
+      storage.setItem("manasUsername", user.username);
+    }
+
+    if (user.age !== undefined) {
+      storage.setItem("manasAge", String(user.age));
+    }
+
+    if (user.mobile !== undefined) {
+      storage.setItem("manasMobile", String(user.mobile));
+    }
+  }
+
+  // ==========================================
   // PATIENT LOGIN
   // ==========================================
 
-  function handlePatientLogin(e) {
+  async function handlePatientLogin(e) {
     e.preventDefault();
 
-    const userId = patientId.trim();
+    const username = patientId.trim();
     const password = patientPassword.trim();
 
-    if (!userId || !password) {
+    if (!username || !password) {
       showToast("Please enter your User ID and password.");
       return;
     }
 
-    const storedPatients = JSON.parse(
-      localStorage.getItem("manasPatients") || "[]",
-    );
+    try {
+      setIsLoading(true);
 
-    const matchedPatient = storedPatients.find(
-      (patient) => patient.id === userId,
-    );
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
 
-    localStorage.setItem("manasRole", "patient");
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-    localStorage.setItem(
-      "manasUser",
-      matchedPatient ? matchedPatient.name : userId,
-    );
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
 
-    localStorage.setItem("manasUserId", userId);
+      const data = await response.json();
 
-    localStorage.setItem(
-      "manasAge",
-      matchedPatient ? matchedPatient.age : "65",
-    );
+      if (!response.ok) {
+        showToast(data.message || "Invalid username or password.");
+        return;
+      }
 
-    localStorage.setItem(
-      "manasMobile",
-      matchedPatient ? matchedPatient.mobile : "+91 98765 43210",
-    );
+      // Make sure this is a patient
+      if (data.user?.role !== "patient") {
+        showToast("These credentials belong to a caretaker.");
+        return;
+      }
 
-    showToast("Login successful!");
+      // Save JWT
+      saveAuthSession(data.token, data.user, rememberDevice);
 
-    setTimeout(() => {
-      navigate("/patient");
-    }, 700);
+      showToast("Login successful!");
+
+      setTimeout(() => {
+        closeAuth();
+
+        // Patient stays in main MANAS app
+        navigate("/patient");
+      }, 500);
+    } catch (error) {
+      console.error("Patient login error:", error);
+
+      showToast("Unable to connect to server.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   // ==========================================
   // CARETAKER LOGIN
   // ==========================================
 
-  function handleCaretakerLogin(e) {
+  async function handleCaretakerLogin(e) {
     e.preventDefault();
 
-    const email = caretakerEmail.trim();
-
+    const username = caretakerEmail.trim();
     const password = caretakerPassword.trim();
 
-    if (!email || !password) {
-      showToast("Please enter your email/phone and password.");
+    if (!username || !password) {
+      showToast("Please enter your username and password.");
       return;
     }
 
-    localStorage.setItem("manasRole", "caretaker");
+    try {
+      setIsLoading(true);
 
-    localStorage.setItem("manasUser", email);
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
 
-    showToast("Login successful!");
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-    setTimeout(() => {
-      navigate("/patient");
-    }, 700);
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showToast(data.message || "Invalid username or password.");
+        return;
+      }
+
+      // Make sure this is a caretaker
+      if (data.user?.role !== "caretaker") {
+        showToast("These credentials belong to a patient.");
+        return;
+      }
+
+      // Caretaker session always remembered
+      saveAuthSession(data.token, data.user, true);
+
+      showToast("Login successful!");
+
+      setTimeout(() => {
+        closeAuth();
+
+        /*
+          Caretaker dashboard is a separate
+          React application running on port 5174.
+        */
+
+        window.location.href = `${CAREGIVER_URL}?token=${encodeURIComponent(
+          data.token,
+        )}&role=${encodeURIComponent(
+          data.user.role,
+        )}&userId=${encodeURIComponent(
+          data.user.id || data.user._id || "",
+        )}&userName=${encodeURIComponent(
+          data.user.name || "",
+        )}&username=${encodeURIComponent(data.user.username || "")}`;
+      }, 500);
+    } catch (error) {
+      console.error("Caretaker login error:", error);
+
+      showToast("Unable to connect to server.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   // ==========================================
   // CARETAKER SIGN UP
   // ==========================================
 
-  function handleCaretakerSignup(e) {
+  async function handleCaretakerSignup(e) {
     e.preventDefault();
 
     const name = caretakerName.trim();
 
-    const email = caretakerSignupEmail.trim();
+    const username = caretakerSignupEmail.trim();
 
     const password = caretakerSignupPassword.trim();
 
-    if (!name || !email || !password) {
+    if (!name || !username || !password) {
       showToast("Please fill all the fields.");
       return;
     }
@@ -157,15 +285,68 @@ export default function Home() {
       return;
     }
 
-    localStorage.setItem("caretakerName", name);
+    try {
+      setIsLoading(true);
 
-    localStorage.setItem("caretakerEmail", email);
+      const response = await fetch(`${API_URL}/auth/caretaker/signup`, {
+        method: "POST",
 
-    showToast("Account created successfully!");
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-    setTimeout(() => {
-      setAuthMode("login");
-    }, 800);
+        body: JSON.stringify({
+          name,
+          username,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showToast(data.message || "Unable to create account.");
+        return;
+      }
+
+      // Signup successful
+      // Backend returns token + user
+      if (data.token && data.user) {
+        saveAuthSession(data.token, data.user, true);
+      }
+
+      showToast("Account created successfully!");
+
+      setCaretakerName("");
+      setCaretakerSignupEmail("");
+      setCaretakerSignupPassword("");
+      setCaretakerTerms(false);
+
+      setTimeout(() => {
+        closeAuth();
+
+        /*
+          Signup successful:
+          directly open caretaker dashboard.
+        */
+
+        window.location.href = `${CAREGIVER_URL}?token=${encodeURIComponent(
+          data.token,
+        )}&role=${encodeURIComponent(
+          data.user.role,
+        )}&userId=${encodeURIComponent(
+          data.user.id || data.user._id || "",
+        )}&userName=${encodeURIComponent(
+          data.user.name || "",
+        )}&username=${encodeURIComponent(data.user.username || "")}`;
+      }, 700);
+    } catch (error) {
+      console.error("Caretaker signup error:", error);
+
+      showToast("Unable to connect to server.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   // ==========================================
@@ -202,16 +383,16 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  // ==========================================
+  // UI
+  // ==========================================
+
   return (
     <div className="home-page">
-      {/* ==========================================
-          MAIN ROLE SCREEN
-      ========================================== */}
+      {/* MAIN ROLE SCREEN */}
 
       <main className="role-screen">
-        {/* ========================================
-            LEFT HERO
-        ======================================== */}
+        {/* LEFT HERO */}
 
         <section className="role-hero">
           <div className="role-hero-content">
@@ -340,18 +521,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ========================================
-            RIGHT IMAGE
-        ======================================== */}
+        {/* RIGHT IMAGE */}
 
         <div className="role-art-strip">
           <img src="/couple.png" alt="Elderly couple enjoying SmritiSetu" />
         </div>
       </main>
 
-      {/* ==========================================
-          AUTH MODAL
-      ========================================== */}
+      {/* AUTH MODAL */}
 
       {showAuth && (
         <div
@@ -371,9 +548,7 @@ export default function Home() {
               ×
             </button>
 
-            {/* ====================================
-                AUTH IMAGE
-            ==================================== */}
+            {/* AUTH IMAGE */}
 
             <div className="auth-art-pane">
               <div className="auth-art">
@@ -392,9 +567,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ====================================
-                AUTH FORM
-            ==================================== */}
+            {/* AUTH FORM */}
 
             <div
               className={`auth-form-pane ${
@@ -431,9 +604,7 @@ export default function Home() {
                 </p>
               </header>
 
-              {/* ==================================
-                  PATIENT AUTH
-              ================================== */}
+              {/* PATIENT AUTH */}
 
               {selectedRole === "patient" && (
                 <div className="auth-role-view">
@@ -470,9 +641,24 @@ export default function Home() {
                       </button>
                     </label>
 
-                    <button className="primary-btn full-btn" type="submit">
-                      Login
-                      <span>→</span>
+                    <label className="terms-check">
+                      <input
+                        type="checkbox"
+                        checked={rememberDevice}
+                        onChange={(e) => setRememberDevice(e.target.checked)}
+                      />
+
+                      <span>Remember my device</span>
+                    </label>
+
+                    <button
+                      className="primary-btn full-btn"
+                      type="submit"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Logging in..." : "Login"}
+
+                      {!isLoading && <span>→</span>}
                     </button>
 
                     <p className="login-note">
@@ -483,9 +669,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* ==================================
-                  CARETAKER AUTH
-              ================================== */}
+              {/* CARETAKER AUTH */}
 
               {selectedRole === "caretaker" && (
                 <div className="auth-role-view">
@@ -513,9 +697,7 @@ export default function Home() {
                     </button>
                   </div>
 
-                  {/* ==================================
-                      LOGIN
-                  ================================== */}
+                  {/* CARETAKER LOGIN */}
 
                   {authMode === "login" && (
                     <div>
@@ -525,7 +707,7 @@ export default function Home() {
 
                           <input
                             type="text"
-                            placeholder="Email or Phone Number"
+                            placeholder="Username"
                             autoComplete="username"
                             value={caretakerEmail}
                             onChange={(e) => setCaretakerEmail(e.target.value)}
@@ -556,9 +738,14 @@ export default function Home() {
                           </button>
                         </label>
 
-                        <button className="primary-btn full-btn" type="submit">
-                          Login
-                          <span>→</span>
+                        <button
+                          className="primary-btn full-btn"
+                          type="submit"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Logging in..." : "Login"}
+
+                          {!isLoading && <span>→</span>}
                         </button>
                       </form>
 
@@ -575,9 +762,7 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* ==================================
-                      SIGNUP
-                  ================================== */}
+                  {/* CARETAKER SIGNUP */}
 
                   {authMode === "signup" && (
                     <div>
@@ -597,8 +782,9 @@ export default function Home() {
                           <span className="field-icon">@</span>
 
                           <input
-                            type="email"
-                            placeholder="Email Address"
+                            type="text"
+                            placeholder="Username"
+                            autoComplete="username"
                             value={caretakerSignupEmail}
                             onChange={(e) =>
                               setCaretakerSignupEmail(e.target.value)
@@ -612,6 +798,7 @@ export default function Home() {
                           <input
                             type={showSignupPassword ? "text" : "password"}
                             placeholder="Create Password"
+                            autoComplete="new-password"
                             value={caretakerSignupPassword}
                             onChange={(e) =>
                               setCaretakerSignupPassword(e.target.value)
@@ -641,9 +828,14 @@ export default function Home() {
                           <span>I agree to the Terms &amp; Conditions</span>
                         </label>
 
-                        <button className="primary-btn full-btn" type="submit">
-                          Create Account
-                          <span>→</span>
+                        <button
+                          className="primary-btn full-btn"
+                          type="submit"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Creating..." : "Create Account"}
+
+                          {!isLoading && <span>→</span>}
                         </button>
                       </form>
 
@@ -666,9 +858,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ==========================================
-          TOAST
-      ========================================== */}
+      {/* TOAST */}
 
       {toast && (
         <div className="toast-container">

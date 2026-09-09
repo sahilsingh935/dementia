@@ -1,6 +1,18 @@
 const DB_NAME = "SmritiSetuPuzzleDB";
 const STORE_NAME = "puzzleResults";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+
+// ========================================
+// GET CURRENT PATIENT
+// ========================================
+
+function getCurrentPatientId() {
+  return (
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null
+  );
+}
 
 // ========================================
 // OPEN DATABASE
@@ -8,16 +20,90 @@ const DB_VERSION = 1;
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const request = indexedDB.open(
+      DB_NAME,
+      DB_VERSION
+    );
 
-    request.onupgradeneeded = () => {
-      const db = request.result;
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      const transaction = event.target.transaction;
+
+      // ========================================
+      // CREATE STORE
+      // ========================================
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, {
-          keyPath: "id",
-          autoIncrement: true,
-        });
+        const store = db.createObjectStore(
+          STORE_NAME,
+          {
+            keyPath: "id",
+            autoIncrement: true,
+          }
+        );
+
+        store.createIndex(
+          "synced",
+          "synced",
+          {
+            unique: false,
+          }
+        );
+
+        store.createIndex(
+          "patientKey",
+          "patientKey",
+          {
+            unique: false,
+          }
+        );
+
+        store.createIndex(
+          "createdAt",
+          "createdAt",
+          {
+            unique: false,
+          }
+        );
+      }
+
+      // ========================================
+      // UPGRADE EXISTING STORE
+      // ========================================
+
+      else {
+        const store =
+          transaction.objectStore(STORE_NAME);
+
+        if (!store.indexNames.contains("synced")) {
+          store.createIndex(
+            "synced",
+            "synced",
+            {
+              unique: false,
+            }
+          );
+        }
+
+        if (!store.indexNames.contains("patientKey")) {
+          store.createIndex(
+            "patientKey",
+            "patientKey",
+            {
+              unique: false,
+            }
+          );
+        }
+
+        if (!store.indexNames.contains("createdAt")) {
+          store.createIndex(
+            "createdAt",
+            "createdAt",
+            {
+              unique: false,
+            }
+          );
+        }
       }
     };
 
@@ -36,29 +122,78 @@ function openDB() {
 // ========================================
 
 export async function savePuzzleResult(data) {
+  const patientKey =
+    getCurrentPatientId();
+
+  if (!patientKey) {
+    console.error(
+      "No logged-in patient found. Puzzle result not saved."
+    );
+
+    throw new Error(
+      "Patient authentication required."
+    );
+  }
+
   const db = await openDB();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
+  return new Promise(
+    (resolve, reject) => {
+      const transaction =
+        db.transaction(
+          STORE_NAME,
+          "readwrite"
+        );
 
-    const store = transaction.objectStore(STORE_NAME);
+      const store =
+        transaction.objectStore(
+          STORE_NAME
+        );
 
-    const request = store.add({
-      ...data,
+      const request = store.add({
+        ...data,
 
-      synced: false,
+        // ========================================
+        // PATIENT IDENTIFICATION
+        // ========================================
 
-      createdAt: new Date().toISOString(),
-    });
+        patientKey,
 
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
+        // ========================================
+        // SYNC
+        // ========================================
 
-    request.onerror = () => {
-      reject(request.error);
-    };
-  });
+        synced: false,
+
+        // ========================================
+        // TIMESTAMP
+        // ========================================
+
+        createdAt:
+          new Date().toISOString(),
+      });
+
+      request.onsuccess = () => {
+        console.log(
+          "Puzzle result saved locally:",
+          {
+            id: request.result,
+            patientKey,
+          }
+        );
+
+        resolve(
+          request.result
+        );
+      };
+
+      request.onerror = () => {
+        reject(
+          request.error
+        );
+      };
+    }
+  );
 }
 
 // ========================================
@@ -66,25 +201,57 @@ export async function savePuzzleResult(data) {
 // ========================================
 
 export async function getUnsyncedPuzzleResults() {
+  const patientKey =
+    getCurrentPatientId();
+
+  if (!patientKey) {
+    console.log(
+      "No logged-in patient - Puzzle sync skipped."
+    );
+
+    return [];
+  }
+
   const db = await openDB();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readonly");
+  return new Promise(
+    (resolve, reject) => {
+      const transaction =
+        db.transaction(
+          STORE_NAME,
+          "readonly"
+        );
 
-    const store = transaction.objectStore(STORE_NAME);
+      const store =
+        transaction.objectStore(
+          STORE_NAME
+        );
 
-    const request = store.getAll();
+      const request =
+        store.getAll();
 
-    request.onsuccess = () => {
-      const unsynced = request.result.filter((item) => item.synced === false);
+      request.onsuccess = () => {
+        const results =
+          request.result || [];
 
-      resolve(unsynced);
-    };
+        const unsynced =
+          results.filter(
+            (item) =>
+              item.synced === false &&
+              item.patientKey ===
+                patientKey
+          );
 
-    request.onerror = () => {
-      reject(request.error);
-    };
-  });
+        resolve(unsynced);
+      };
+
+      request.onerror = () => {
+        reject(
+          request.error
+        );
+      };
+    }
+  );
 }
 
 // ========================================
@@ -94,36 +261,54 @@ export async function getUnsyncedPuzzleResults() {
 export async function markPuzzleSynced(id) {
   const db = await openDB();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
+  return new Promise(
+    (resolve, reject) => {
+      const transaction =
+        db.transaction(
+          STORE_NAME,
+          "readwrite"
+        );
 
-    const store = transaction.objectStore(STORE_NAME);
+      const store =
+        transaction.objectStore(
+          STORE_NAME
+        );
 
-    const request = store.get(id);
+      const request =
+        store.get(id);
 
-    request.onsuccess = () => {
-      const data = request.result;
+      request.onsuccess = () => {
+        const data =
+          request.result;
 
-      if (!data) {
-        resolve();
-        return;
-      }
+        if (!data) {
+          resolve();
+          return;
+        }
 
-      data.synced = true;
+        data.synced = true;
 
-      const updateRequest = store.put(data);
+        const updateRequest =
+          store.put(data);
 
-      updateRequest.onsuccess = () => {
-        resolve();
+        updateRequest.onsuccess =
+          () => {
+            resolve();
+          };
+
+        updateRequest.onerror =
+          () => {
+            reject(
+              updateRequest.error
+            );
+          };
       };
 
-      updateRequest.onerror = () => {
-        reject(updateRequest.error);
+      request.onerror = () => {
+        reject(
+          request.error
+        );
       };
-    };
-
-    request.onerror = () => {
-      reject(request.error);
-    };
-  });
+    }
+  );
 }

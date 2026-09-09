@@ -2,6 +2,31 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./PatientHome.css";
 
+// =========================
+// AUTH HELPERS
+// =========================
+
+function getPatientAuth() {
+  return {
+    token:
+      localStorage.getItem("manasToken") ||
+      sessionStorage.getItem("manasToken") ||
+      null,
+    role:
+      localStorage.getItem("manasRole") ||
+      sessionStorage.getItem("manasRole") ||
+      null,
+    userId:
+      localStorage.getItem("manasUserId") ||
+      sessionStorage.getItem("manasUserId") ||
+      null,
+    name:
+      localStorage.getItem("manasUser") ||
+      sessionStorage.getItem("manasUser") ||
+      null,
+  };
+}
+
 const games = [
   {
     id: "memory",
@@ -148,36 +173,62 @@ function PatientHome() {
   /* ================= PATIENT DATA ================= */
 
   useEffect(() => {
-    const name =
-      localStorage.getItem("manasUser") || localStorage.getItem("patientName");
+    const auth = getPatientAuth();
 
-    if (name) {
-      setPatientName(name);
+    // Patient dashboard should only be used by a logged-in patient.
+    if (!auth.token || auth.role !== "patient") {
+      navigate("/");
+      return;
     }
 
-    const savedLanguage = localStorage.getItem("manasLanguage");
+    if (auth.name) {
+      setPatientName(auth.name);
+    } else {
+      const fallbackName =
+        localStorage.getItem("patientName") ||
+        sessionStorage.getItem("patientName");
+
+      if (fallbackName) {
+        setPatientName(fallbackName);
+      }
+    }
+
+    const savedLanguage =
+      localStorage.getItem("manasLanguage") ||
+      sessionStorage.getItem("manasLanguage");
 
     if (savedLanguage) {
       setLanguage(savedLanguage);
     }
 
-    const savedReminders = localStorage.getItem("manasReminders");
+    const savedReminders =
+      localStorage.getItem("manasReminders") ||
+      sessionStorage.getItem("manasReminders");
 
     if (savedReminders) {
       try {
-        setReminders(JSON.parse(savedReminders));
+        const parsed = JSON.parse(savedReminders);
+        setReminders(Array.isArray(parsed) ? parsed : defaultReminders);
       } catch {
         setReminders(defaultReminders);
       }
     } else {
       setReminders(defaultReminders);
     }
-  }, []);
+  }, [navigate]);
 
   /* ================= SAVE REMINDERS ================= */
 
   useEffect(() => {
-    localStorage.setItem("manasReminders", JSON.stringify(reminders));
+    const auth = getPatientAuth();
+
+    if (!auth.token || auth.role !== "patient") return;
+
+    const storage = localStorage.getItem("manasToken")
+      ? localStorage
+      : sessionStorage;
+
+    storage.setItem("manasReminders", JSON.stringify(reminders));
   }, [reminders]);
 
   /* ================= TIME UPDATE ================= */
@@ -380,7 +431,11 @@ function PatientHome() {
   function changeLanguage(value) {
     setLanguage(value);
 
-    localStorage.setItem("manasLanguage", value);
+    const storage = localStorage.getItem("manasToken")
+      ? localStorage
+      : sessionStorage;
+
+    storage.setItem("manasLanguage", value);
 
     setShowLanguage(false);
   }
@@ -388,11 +443,17 @@ function PatientHome() {
   /* ================= LOGOUT ================= */
 
   function handleLogout() {
-    localStorage.removeItem("manasRole");
-    localStorage.removeItem("manasUser");
-    localStorage.removeItem("manasUserId");
-    localStorage.removeItem("manasAge");
-    localStorage.removeItem("manasMobile");
+    [
+      "manasToken",
+      "manasRole",
+      "manasUser",
+      "manasUserId",
+      "manasAge",
+      "manasMobile",
+    ].forEach((key) => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    });
 
     navigate("/");
   }
@@ -655,12 +716,20 @@ function PatientHome() {
 
               <div>
                 <span>Age</span>
-                <strong>{localStorage.getItem("manasAge") || "—"}</strong>
+                <strong>
+                  {localStorage.getItem("manasAge") ||
+                    sessionStorage.getItem("manasAge") ||
+                    "—"}
+                </strong>
               </div>
 
               <div>
                 <span>Mobile</span>
-                <strong>{localStorage.getItem("manasMobile") || "—"}</strong>
+                <strong>
+                  {localStorage.getItem("manasMobile") ||
+                    sessionStorage.getItem("manasMobile") ||
+                    "—"}
+                </strong>
               </div>
 
               <div>

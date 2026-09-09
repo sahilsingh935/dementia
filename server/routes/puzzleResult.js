@@ -2,9 +2,16 @@ const express = require("express");
 
 const PuzzleResult = require("../models/PuzzleResult");
 
+const { protect, patientOnly } = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.post("/save", async (req, res) => {
+// ========================================
+// SAVE PUZZLE RESULT
+// Patient only
+// ========================================
+
+router.post("/save", protect, patientOnly, async (req, res) => {
   try {
     const {
       level,
@@ -39,6 +46,9 @@ router.post("/save", async (req, res) => {
     }
 
     const result = await PuzzleResult.create({
+      // JWT se patient ki ID
+      patientId: req.user.id,
+
       level,
       rows,
       cols,

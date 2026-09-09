@@ -1,145 +1,130 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 
 const connectDB = require("./config/db");
 
+// ===============================
+// EXISTING GAME ROUTES
+// ===============================
+
 const gameResultRoutes = require("./routes/gameResultRoutes");
 const difficultyRoutes = require("./routes/difficulty");
-const recallSequenceRoutes = require("./routes/recallSequence");
 
-// Recall Sequence ML route
-const recallSequenceDifficultyRoutes = require("./routes/recallSequenceDifficulty");
-
-// Puzzle Result route
 const puzzleResultRoutes = require("./routes/puzzleResult");
-
-// Puzzle ML route
 const puzzleDifficultyRoutes = require("./routes/puzzleDifficulty");
 
-// Recognition Result route
-const recognitionRoutes = require("./routes/recognition");
+const recallSequenceRoutes = require("./routes/recallSequence");
+const recallSequenceDifficultyRoutes = require("./routes/recallSequenceDifficulty");
 
-// Recognition ML route
+const recognitionRoutes = require("./routes/recognition");
 const recognitionDifficultyRoutes = require("./routes/recognitionDifficulty");
 
-// Routine Result route
 const routineRoutes = require("./routes/routine");
-
-// Routine ML route
 const routineDifficultyRoutes = require("./routes/routineDifficulty");
 
-dotenv.config();
+// ===============================
+// AUTH ROUTES
+// ===============================
 
-connectDB();
+const authRoutes = require("./routes/authRoutes");
+
+// ===============================
+// CARETAKER ROUTES
+// ===============================
+
+const caretakerRoutes = require("./routes/caretakerRoutes");
 
 const app = express();
 
-app.use(cors());
+// ===============================
+// DATABASE
+// ===============================
+
+connectDB();
+
+// ===============================
+// MIDDLEWARE
+// ===============================
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
-// ================================
-// GAME RESULT ROUTES
-// ================================
-
-app.use("/api/game-results", gameResultRoutes);
-
-// ================================
-// MEMORY MATCH ML ROUTES
-// ================================
-
-app.use("/api/difficulty", difficultyRoutes);
-
-// ================================
-// RECALL SEQUENCE ROUTES
-// ================================
-
-app.use(
-  "/api/recall-sequence",
-  recallSequenceRoutes
-);
-
-// ================================
-// RECALL SEQUENCE ML ROUTES
-// ================================
-
-app.use(
-  "/api/recall-sequence/difficulty",
-  recallSequenceDifficultyRoutes
-);
-
-// ================================
-// PUZZLE GAME ROUTES
-// ================================
-
-app.use(
-  "/api/puzzle",
-  puzzleResultRoutes
-);
-
-// ================================
-// PUZZLE ML ROUTES
-// ================================
-
-app.use(
-  "/api/puzzle/difficulty",
-  puzzleDifficultyRoutes
-);
-
-// ================================
-// RECOGNITION GAME ROUTES
-// ================================
-
-app.use(
-  "/api/recognition",
-  recognitionRoutes
-);
-
-// ================================
-// RECOGNITION ML ROUTES
-// ================================
-
-app.use(
-  "/api/recognition/difficulty",
-  recognitionDifficultyRoutes
-);
-
-// ================================
-// ROUTINE GAME ROUTES
-// ================================
-
-app.use(
-  "/api/routine",
-  routineRoutes
-);
-
-// ================================
-// ROUTINE ML ROUTES
-// ================================
-
-app.use(
-  "/api/routine/difficulty",
-  routineDifficultyRoutes
-);
-
-// ================================
-// HOME ROUTE
-// ================================
+// ===============================
+// HEALTH CHECK
+// ===============================
 
 app.get("/", (req, res) => {
   res.json({
-    message: "SmritiSetu Server is running",
+    message: "MANAS backend is running",
   });
 });
 
-// ================================
+// ===============================
+// AUTH
+// ===============================
+
+app.use("/api/auth", authRoutes);
+
+// ===============================
+// CARETAKER
+// ===============================
+
+app.use("/api/caretaker", caretakerRoutes);
+
+// ===============================
+// EXISTING GAME APIs
+// ===============================
+
+app.use("/api/game-results", gameResultRoutes);
+
+app.use("/api/difficulty", difficultyRoutes);
+
+app.use("/api/puzzle", puzzleResultRoutes);
+
+app.use("/api/puzzle/difficulty", puzzleDifficultyRoutes);
+
+app.use("/api/recall-sequence", recallSequenceRoutes);
+
+app.use("/api/recall-sequence/difficulty", recallSequenceDifficultyRoutes);
+
+app.use("/api/recognition", recognitionRoutes);
+
+app.use("/api/recognition/difficulty", recognitionDifficultyRoutes);
+
+app.use("/api/routine", routineRoutes);
+
+app.use("/api/routine/difficulty", routineDifficultyRoutes);
+
+// ===============================
+// ERROR HANDLER
+// ===============================
+
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  res.status(500).json({
+    message: "Internal server error",
+  });
+});
+
+// ===============================
 // SERVER
-// ================================
+// ===============================
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`
-  );
+  console.log(`MANAS backend running on port ${PORT}`);
 });

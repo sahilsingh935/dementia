@@ -1,16 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./RecallSequenceGame.css";
 import { saveRecallSequenceResult } from "../../services/recallSequenceDb";
 
-// ========================================
-// STATE
-// ========================================
-
 const selectedState = "Assam";
-
-// ========================================
-// IMAGES
-// ========================================
 
 const imageModules = import.meta.glob(
   "../../assets/cultural/memory/**/*.{png,jpg,jpeg,webp}",
@@ -21,10 +14,6 @@ const imageModules = import.meta.glob(
   },
 );
 
-// ========================================
-// LEVEL CONFIGURATION
-// ========================================
-
 const LEVEL_LENGTH = {
   1: 3,
   2: 4,
@@ -32,10 +21,6 @@ const LEVEL_LENGTH = {
   4: 6,
   5: 7,
 };
-
-// ========================================
-// DISPLAY TIME
-// ========================================
 
 const DISPLAY_TIME = {
   1: 8,
@@ -45,17 +30,9 @@ const DISPLAY_TIME = {
   5: 12,
 };
 
-// ========================================
-// SHUFFLE
-// ========================================
-
 function shuffle(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
-
-// ========================================
-// GET STATE IMAGES
-// ========================================
 
 function getStateImages(state) {
   const images = [];
@@ -76,39 +53,20 @@ function getStateImages(state) {
   return images;
 }
 
-// ========================================
-// GAME
-// ========================================
-
 export default function RecallSequenceGame() {
-  // ========================================
-  // GAME STATE
-  // ========================================
+  const navigate = useNavigate();
 
   const [level, setLevel] = useState(1);
 
   const [sequence, setSequence] = useState([]);
-
   const [options, setOptions] = useState([]);
-
   const [userSequence, setUserSequence] = useState([]);
 
   const [showSequence, setShowSequence] = useState(false);
-
   const [gameStarted, setGameStarted] = useState(false);
-
   const [result, setResult] = useState("");
 
-  // ========================================
-  // INTERNAL TIMER
-  // ========================================
-
-  // Patient ko timer screen par nahi dikhega
   const [timeLeft, setTimeLeft] = useState(DISPLAY_TIME[1]);
-
-  // ========================================
-  // PERFORMANCE DATA
-  // ========================================
 
   const [totalAttempts, setTotalAttempts] = useState(0);
 
@@ -122,97 +80,73 @@ export default function RecallSequenceGame() {
 
   const [score, setScore] = useState(0);
 
-  // ========================================
-  // PREVIOUS SCORE
-  // ========================================
-
-  const [previousScore, setPreviousScore] = useState(0);
-
-  // ========================================
-  // ML PREDICTION
-  // ========================================
-
-  const [difficultyChange, setDifficultyChange] = useState("SAME");
-
-  // ========================================
-  // GAME START TIME
-  // ========================================
-
   const gameStartTimeRef = useRef(null);
-
-  // ========================================
-  // AUTO START CONTROL
-  // ========================================
-
-  const autoStartRef = useRef(false);
-
-  // ========================================
-  // LEVEL DATA
-  // ========================================
 
   const sequenceLength = LEVEL_LENGTH[level];
 
   const stateImages = getStateImages(selectedState);
 
   // ========================================
-  // START GAME
+  // START LEVEL
   // ========================================
 
-  const startGame = () => {
-    if (stateImages.length < sequenceLength) {
+  const beginLevel = (levelNumber) => {
+    const length = LEVEL_LENGTH[levelNumber];
+
+    if (stateImages.length < length) {
       setResult("Not enough images available.");
       return;
     }
 
-    // New random sequence
-    const newSequence = shuffle(stateImages).slice(0, sequenceLength);
+    const newSequence = shuffle(stateImages).slice(0, length);
 
     setSequence(newSequence);
-
     setOptions([]);
-
     setUserSequence([]);
 
     setResult("");
-
     setGameStarted(true);
-
     setShowSequence(true);
 
-    // Internal display timer
-    setTimeLeft(DISPLAY_TIME[level]);
+    setTimeLeft(DISPLAY_TIME[levelNumber]);
 
-    // Start response-time measurement
     gameStartTimeRef.current = Date.now();
   };
 
   // ========================================
-  // AUTO START GAME
+  // AUTH CHECK + AUTO START
   // ========================================
 
   useEffect(() => {
-    if (!gameStarted && !result && !autoStartRef.current) {
-      autoStartRef.current = true;
+    const token =
+      localStorage.getItem("manasToken") ||
+      sessionStorage.getItem("manasToken");
 
-      startGame();
-    }
-  }, [level]);
+    const role =
+      localStorage.getItem("manasRole") || sessionStorage.getItem("manasRole");
 
-  // ========================================
-  // INTERNAL COUNTDOWN
-  // ========================================
+    const userId =
+      localStorage.getItem("manasUserId") ||
+      sessionStorage.getItem("manasUserId");
 
-  useEffect(() => {
-    if (!showSequence) {
+    if (!token || role !== "patient" || !userId) {
+      navigate("/");
       return;
     }
 
+    beginLevel(1);
+  }, [navigate]);
+
+  // ========================================
+  // TIMER
+  // ========================================
+
+  useEffect(() => {
+    if (!showSequence) return;
+
     if (timeLeft === 0) {
       setShowSequence(false);
-
-      // Same images, shuffled
       setOptions(shuffle(sequence));
-
       return;
     }
 
@@ -224,7 +158,7 @@ export default function RecallSequenceGame() {
   }, [showSequence, timeLeft, sequence]);
 
   // ========================================
-  // IMAGE CLICK
+  // IMAGE SELECT
   // ========================================
 
   const handleImageClick = (image) => {
@@ -232,7 +166,6 @@ export default function RecallSequenceGame() {
       return;
     }
 
-    // Same image cannot be selected twice
     if (userSequence.includes(image)) {
       return;
     }
@@ -241,74 +174,8 @@ export default function RecallSequenceGame() {
 
     setUserSequence(newUserSequence);
 
-    // Complete sequence
     if (newUserSequence.length === sequenceLength) {
       checkAnswer(newUserSequence);
-    }
-  };
-
-  // ========================================
-  // REMOVE SELECTED IMAGE
-  // ========================================
-
-  const removeSelectedImage = (imageToRemove) => {
-    setUserSequence((prev) => prev.filter((image) => image !== imageToRemove));
-  };
-
-  // ========================================
-  // ML API CALL
-  // ========================================
-
-  const getDifficultyPrediction = async ({
-    sequenceLength,
-    accuracy,
-    responseTime,
-    totalAttempts,
-    mistakes,
-    previousScore,
-    currentLevel,
-  }) => {
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/recall-sequence/difficulty/predict",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({
-            sequence_length: sequenceLength,
-
-            accuracy,
-
-            response_time: responseTime,
-
-            total_attempts: totalAttempts,
-
-            mistakes,
-
-            previous_score: previousScore,
-
-            current_level: currentLevel,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("ML API request failed");
-      }
-
-      const data = await response.json();
-
-      return data.difficulty_change || "SAME";
-    } catch (error) {
-      console.error("Recall Sequence ML error:", error);
-
-      // Offline/API failure
-      // Same difficulty fallback
-      return "SAME";
     }
   };
 
@@ -317,14 +184,9 @@ export default function RecallSequenceGame() {
   // ========================================
 
   const checkAnswer = async (answer) => {
-    // One attempt completed
     const newTotalAttempts = totalAttempts + 1;
 
     const isCorrect = answer.every((image, index) => image === sequence[index]);
-
-    // ========================================
-    // RESPONSE TIME
-    // ========================================
 
     const timeTaken = Math.round(
       (Date.now() - gameStartTimeRef.current) / 1000,
@@ -332,230 +194,119 @@ export default function RecallSequenceGame() {
 
     setResponseTime(timeTaken);
 
-    // ========================================
+    // ======================================
     // CORRECT
-    // ========================================
+    // ======================================
 
     if (isCorrect) {
       const newCorrectAttempts = correctAttempts + 1;
-
-      const newAccuracy = (newCorrectAttempts / newTotalAttempts) * 100;
-
-      const roundedAccuracy = Number(newAccuracy.toFixed(2));
-
-      const newScore = Math.max(0, Math.round(newAccuracy));
 
       setTotalAttempts(newTotalAttempts);
 
       setCorrectAttempts(newCorrectAttempts);
 
-      setAccuracy(roundedAccuracy);
+      const newAccuracy = (newCorrectAttempts / newTotalAttempts) * 100;
 
-      setScore(newScore);
-
-      setResult("correct");
-
-      // ========================================
-      // ASK ML
-      // ========================================
-
-      const prediction = await getDifficultyPrediction({
-        sequenceLength,
-
-        accuracy: roundedAccuracy,
-
-        responseTime: timeTaken,
-
-        totalAttempts: newTotalAttempts,
-
-        mistakes,
-
-        previousScore,
-
-        currentLevel: level,
-      });
-
-      console.log("Recall Sequence ML:", prediction);
-
-      setDifficultyChange(prediction);
-
-      // ========================================
-      // SAVE RESULT
-      // ========================================
-
-      await saveRecallSequenceResult({
-        level,
-
-        sequenceLength,
-
-        totalAttempts: newTotalAttempts,
-
-        correctAttempts: newCorrectAttempts,
-
-        mistakes,
-
-        accuracy: roundedAccuracy,
-
-        responseTime: timeTaken,
-
-        score: newScore,
-
-        difficultyChange: prediction,
-
-        previousScore,
-      });
-
-      // Current score becomes
-      // previous score
-      setPreviousScore(newScore);
-
-      // ========================================
-      // AUTOMATIC NEXT LEVEL
-      // ========================================
-
-      setTimeout(() => {
-        nextLevel(prediction);
-      }, 1200);
-    } else {
-      // ========================================
-      // WRONG
-      // ========================================
-
-      const newMistakes = mistakes + 1;
-
-      const newAccuracy = (correctAttempts / newTotalAttempts) * 100;
-
-      const roundedAccuracy = Number(newAccuracy.toFixed(2));
+      setAccuracy(Number(newAccuracy.toFixed(2)));
 
       const newScore = Math.max(0, Math.round(newAccuracy));
+
+      setScore(newScore);
+      setResult("correct");
+
+      // Save result safely
+      try {
+        await saveRecallSequenceResult({
+          level,
+          sequenceLength,
+          totalAttempts: newTotalAttempts,
+          correctAttempts: newCorrectAttempts,
+          mistakes,
+          accuracy: Number(newAccuracy.toFixed(2)),
+          responseTime: timeTaken,
+          score: newScore,
+          difficultyChange: "SAME",
+        });
+      } catch (error) {
+        console.error("Failed to save Recall Sequence result:", error);
+      }
+    }
+
+    // ======================================
+    // WRONG
+    // ======================================
+    else {
+      const newMistakes = mistakes + 1;
 
       setTotalAttempts(newTotalAttempts);
 
       setMistakes(newMistakes);
 
-      setAccuracy(roundedAccuracy);
+      const newAccuracy = (correctAttempts / newTotalAttempts) * 100;
+
+      setAccuracy(Number(newAccuracy.toFixed(2)));
+
+      const newScore = Math.max(0, Math.round(newAccuracy));
 
       setScore(newScore);
-
       setResult("wrong");
 
-      // ========================================
-      // SAVE WRONG ATTEMPT
-      // ========================================
-
-      await saveRecallSequenceResult({
-        level,
-
-        sequenceLength,
-
-        totalAttempts: newTotalAttempts,
-
-        correctAttempts,
-
-        mistakes: newMistakes,
-
-        accuracy: roundedAccuracy,
-
-        responseTime: timeTaken,
-
-        score: newScore,
-
-        difficultyChange: "SAME",
-
-        previousScore,
-      });
+      // Save result safely
+      try {
+        await saveRecallSequenceResult({
+          level,
+          sequenceLength,
+          totalAttempts: newTotalAttempts,
+          correctAttempts,
+          mistakes: newMistakes,
+          accuracy: Number(newAccuracy.toFixed(2)),
+          responseTime: timeTaken,
+          score: newScore,
+          difficultyChange: "SAME",
+        });
+      } catch (error) {
+        console.error("Failed to save Recall Sequence result:", error);
+      }
     }
   };
 
   // ========================================
-  // NEXT LEVEL USING ML
+  // AUTO NEXT LEVEL
   // ========================================
 
-  const nextLevel = (prediction) => {
-    let nextLevelValue = level;
-
-    // ========================================
-    // ML DECISION
-    // ========================================
-
-    if (prediction === "HARDER") {
-      nextLevelValue = Math.min(5, level + 1);
-    } else if (prediction === "EASIER") {
-      nextLevelValue = Math.max(1, level - 1);
-    } else {
-      // SAME
-      nextLevelValue = level;
+  useEffect(() => {
+    if (result !== "correct") {
+      return;
     }
 
-    console.log("Current Level:", level);
-
-    console.log("ML Decision:", prediction);
-
-    console.log("Next Level:", nextLevelValue);
-
-    // ========================================
-    // RESET GAME UI
-    // ========================================
-
-    setGameStarted(false);
-
-    setSequence([]);
-
-    setOptions([]);
-
-    setUserSequence([]);
-
-    setShowSequence(false);
-
-    setResult("");
-
-    setTimeLeft(DISPLAY_TIME[nextLevelValue]);
-
-    setDifficultyChange(prediction);
-
-    // ========================================
-    // LEVEL CHANGE
-    // ========================================
-
-    if (nextLevelValue !== level) {
-      setLevel(nextLevelValue);
+    if (level >= 5) {
+      return;
     }
 
-    // Allow automatic start again
-    autoStartRef.current = false;
-  };
+    const timer = setTimeout(() => {
+      const nextLevel = level + 1;
+
+      setLevel(nextLevel);
+
+      setTotalAttempts(0);
+      setCorrectAttempts(0);
+      setMistakes(0);
+      setAccuracy(0);
+      setResponseTime(0);
+      setScore(0);
+
+      beginLevel(nextLevel);
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [result, level]);
 
   // ========================================
   // TRY AGAIN
   // ========================================
 
   const restartGame = () => {
-    setGameStarted(false);
-
-    setSequence([]);
-
-    setOptions([]);
-
-    setUserSequence([]);
-
-    setShowSequence(false);
-
-    setResult("");
-
-    setTimeLeft(DISPLAY_TIME[level]);
-
-    // Attempts and mistakes
-    // preserve rahenge
-
-    gameStartTimeRef.current = null;
-
-    // Allow automatic start
-    autoStartRef.current = false;
-
-    // Automatically restart
-    setTimeout(() => {
-      startGame();
-    }, 100);
+    beginLevel(level);
   };
 
   // ========================================
@@ -564,121 +315,143 @@ export default function RecallSequenceGame() {
 
   return (
     <div className="recall-container">
-      <h1>🧠 Recall the Sequence</h1>
+      {/* ==================================
+          MAIN CARD
+      ================================== */}
 
-      <h2>Level {level}</h2>
+      <div className="recall-game-box">
+        {/* BACK BUTTON */}
 
-      <p className="instruction">Remember the images in the exact order.</p>
-
-      {/* ==========================
-          SHOW SEQUENCE
-      ========================== */}
-
-      {gameStarted && showSequence && (
-        <div className="game-section">
-          <h2>Remember this sequence</h2>
-
-          <div className="image-row">
-            {sequence.map((image, index) => (
-              <div className="sequence-card" key={`${image}-${index}`}>
-                <img src={image} alt="Memory item" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ==========================
-          SELECT SEQUENCE
-      ========================== */}
-
-      {gameStarted && !showSequence && !result && (
-        <div className="game-section">
-          <h2>Select the sequence</h2>
-
-          {/* SELECTED ANSWER */}
-
-          <div className="selected-row">
-            {userSequence.map((image, index) => (
-              <div className="selected-card" key={`${image}-${index}`}>
-                {/* REMOVE BUTTON */}
-
-                <button
-                  type="button"
-                  className="remove-card-button"
-                  onClick={() => removeSelectedImage(image)}
-                  aria-label="Remove selected image"
-                >
-                  ×
-                </button>
-
-                <img src={image} alt="Selected item" />
-              </div>
-            ))}
-          </div>
-
-          <p className="selection-count">
-            Selected: {userSequence.length}
-            {" / "}
-            {sequenceLength}
-          </p>
-
-          {/* OPTIONS */}
-
-          <div className="options-grid">
-            {options.map((image, index) => {
-              const alreadySelected = userSequence.includes(image);
-
-              return (
-                <button
-                  key={`${image}-${index}`}
-                  className="image-option"
-                  onClick={() => handleImageClick(image)}
-                  disabled={alreadySelected}
-                >
-                  <img src={image} alt="Memory option" />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ==========================
-          CORRECT RESULT
-      ========================== */}
-
-      {result === "correct" && (
-        <div className="result-section">
-          <h2>🎉 Correct!</h2>
-
-          <p>Accuracy: {accuracy}%</p>
-
-          <p>Score: {score}</p>
-
-          <p>Next level is starting...</p>
-        </div>
-      )}
-
-      {/* ==========================
-          WRONG RESULT
-      ========================== */}
-
-      {result === "wrong" && (
-        <div className="result-section">
-          <h2>❌ Wrong Sequence</h2>
-
-          <p>Don't worry. Try again!</p>
-
-          <p>Accuracy: {accuracy}%</p>
-
-          <p>Mistakes: {mistakes}</p>
-
-          <button className="start-button" onClick={restartGame}>
-            Try Again
+        <div className="recall-topbar">
+          <button
+            type="button"
+            className="recall-back-button"
+            onClick={() => navigate("/patient")}
+          >
+            ← Back
           </button>
         </div>
-      )}
+
+        {/* ==================================
+            TITLE
+        ================================== */}
+
+        <div className="recall-title-row">
+          <span className="title-leaf">❧</span>
+
+          <h1>Recall the Sequence</h1>
+
+          <span className="title-leaf title-leaf-right">❧</span>
+        </div>
+
+        {/* ==================================
+            REMEMBER SEQUENCE
+        ================================== */}
+
+        {gameStarted && showSequence && (
+          <div className="game-section">
+            <div className="section-heading">
+              Remember the images in the exact order.
+            </div>
+
+            <div className="image-row">
+              {sequence.map((image, index) => (
+                <div className="sequence-card" key={`${image}-${index}`}>
+                  <img src={image} alt="Memory item" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ==================================
+            SELECT SEQUENCE
+        ================================== */}
+
+        {gameStarted && !showSequence && !result && (
+          <div className="game-section">
+            <div className="section-heading">
+              Remember the images in the exact order.
+            </div>
+
+            <div className="selected-row">
+              {userSequence.map((image, index) => (
+                <div className="selected-card" key={`${image}-${index}`}>
+                  <img src={image} alt="Selected memory item" />
+                </div>
+              ))}
+            </div>
+
+            <p className="selection-count">
+              Selected: {userSequence.length}
+              {" / "}
+              {sequenceLength}
+            </p>
+
+            <div className="options-grid">
+              {options.map((image, index) => {
+                const alreadySelected = userSequence.includes(image);
+
+                return (
+                  <button
+                    type="button"
+                    key={`${image}-${index}`}
+                    className="image-option"
+                    onClick={() => handleImageClick(image)}
+                    disabled={alreadySelected}
+                  >
+                    <img src={image} alt="Memory option" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ==================================
+            CORRECT
+        ================================== */}
+
+        {result === "correct" && (
+          <div className="result-section">
+            <h2>🎉 Correct!</h2>
+
+            <p>Accuracy: {accuracy}%</p>
+
+            <p>Score: {score}</p>
+
+            {level < 5 && (
+              <p className="next-message">Next level is starting...</p>
+            )}
+
+            {level >= 5 && <h3>🏆 All Levels Completed!</h3>}
+          </div>
+        )}
+
+        {/* ==================================
+            WRONG
+        ================================== */}
+
+        {result === "wrong" && (
+          <div className="result-section">
+            <h2>❌ Wrong Sequence</h2>
+
+            <p>Don't worry. Try again!</p>
+
+            <p>Accuracy: {accuracy}%</p>
+
+            <p>Mistakes: {mistakes}</p>
+
+            <button
+              type="button"
+              className="start-button"
+              onClick={restartGame}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

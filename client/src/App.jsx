@@ -1,13 +1,27 @@
 import { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 
 import NetworkStatus from "./components/NetworkStatus";
 
+// ================================
+// SYNC SERVICES
+// ================================
+
 import { startAutoSync } from "./services/sync";
-import * as recallSequenceSync from "./services/recallSequenceSync";
 import { startPuzzleAutoSync } from "./services/puzzleSync";
 import { startRecognitionAutoSync } from "./services/recognitionSync";
 import { startRoutineAutoSync } from "./services/routineSync";
+import { startRecallSequenceAutoSync } from "./services/recallSequenceSync";
+
+// ================================
+// PAGES
+// ================================
 
 import Home from "./pages/Home";
 import PatientHome from "./pages/PatientHome";
@@ -15,73 +29,116 @@ import Games from "./pages/Games";
 import Reminders from "./pages/Reminders";
 import Profile from "./pages/Profile";
 
+// ================================
+// GAMES
+// ================================
+
 import MemoryGame from "./games/memory/MemoryGame";
 import AttentionGame from "./games/attention/AttentionGame";
 import RoutineGame from "./games/routine/RoutineGame";
 import RecognitionGame from "./games/recognition/RecognitionGame";
 import RecallSequenceGame from "./games/memory/RecallSequenceGame";
 
+// ======================================
+// AUTH HELPER
+// ======================================
+
+function getAuth() {
+  const token =
+    localStorage.getItem("manasToken") ||
+    sessionStorage.getItem("manasToken") ||
+    null;
+
+  const role =
+    localStorage.getItem("manasRole") ||
+    sessionStorage.getItem("manasRole") ||
+    null;
+
+  const userId =
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null;
+
+  return {
+    token,
+    role,
+    userId,
+  };
+}
+
+// ======================================
+// PROTECTED PATIENT ROUTE
+// ======================================
+
+function PatientRoute({ children }) {
+  const location = useLocation();
+  const { token, role } = getAuth();
+
+  if (!token || role !== "patient") {
+    return (
+      <Navigate
+        to="/"
+        replace
+        state={{
+          from: location.pathname,
+          message: "Please login as a patient first.",
+        }}
+      />
+    );
+  }
+
+  return children;
+}
+
+// ======================================
+// PROTECTED GAME ROUTE
+// ======================================
+
+function PatientGameRoute({ children }) {
+  const { token, role } = getAuth();
+
+  if (!token || role !== "patient") {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+// ======================================
+// MAIN APP
+// ======================================
+
 function App() {
-  /*
-    =========================
-    AUTOMATIC OFFLINE SYNC
-    =========================
-  */
+  // ======================================
+  // START ALL AUTO SYNC SERVICES
+  // ======================================
 
   useEffect(() => {
-    // =================================
-    // EXISTING GAMES SYNC
-    // =================================
-
+    // Memory / common game sync
     const cleanupGameSync = startAutoSync();
 
-    // =================================
-    // RECALL SEQUENCE SYNC
-    // =================================
-
-    let cleanupRecallSequenceSync = () => {};
-
-    if (typeof recallSequenceSync.startRecallSequenceAutoSync === "function") {
-      cleanupRecallSequenceSync =
-        recallSequenceSync.startRecallSequenceAutoSync();
-    } else if (
-      typeof recallSequenceSync.startRecallSequenceSync === "function"
-    ) {
-      cleanupRecallSequenceSync = recallSequenceSync.startRecallSequenceSync();
-    }
-
-    // =================================
-    // PUZZLE GAME SYNC
-    // =================================
-
+    // Puzzle / Attention
     const cleanupPuzzleSync = startPuzzleAutoSync();
 
-    // =================================
-    // RECOGNITION GAME SYNC
-    // =================================
-
+    // Recognition
     const cleanupRecognitionSync = startRecognitionAutoSync();
 
-    // =================================
-    // ROUTINE GAME SYNC
-    // =================================
-
+    // Routine
     const cleanupRoutineSync = startRoutineAutoSync();
 
-    // =================================
+    // Recall Sequence
+    const cleanupRecallSequenceSync = startRecallSequenceAutoSync();
+
+    // ======================================
     // CLEANUP
-    // =================================
+    // ======================================
 
     return () => {
-      cleanupGameSync();
-
-      cleanupRecallSequenceSync();
-
-      cleanupPuzzleSync();
-
-      cleanupRecognitionSync();
-
-      cleanupRoutineSync();
+      cleanupGameSync?.();
+      cleanupPuzzleSync?.();
+      cleanupRecognitionSync?.();
+      cleanupRoutineSync?.();
+      cleanupRecallSequenceSync?.();
     };
   }, []);
 
@@ -90,40 +147,126 @@ function App() {
       <NetworkStatus />
 
       <Routes>
-        {/* =========================
-            MAIN PAGES
-        ========================= */}
+        {/* ==================================
+            PUBLIC
+        ================================== */}
 
         <Route path="/" element={<Home />} />
 
-        <Route path="/patient" element={<PatientHome />} />
+        {/* ==================================
+            PATIENT HOME
+        ================================== */}
 
-        <Route path="/games" element={<Games />} />
+        <Route
+          path="/patient"
+          element={
+            <PatientRoute>
+              <PatientHome />
+            </PatientRoute>
+          }
+        />
 
-        <Route path="/reminders" element={<Reminders />} />
+        {/* ==================================
+            PATIENT PAGES
+        ================================== */}
 
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/games"
+          element={
+            <PatientRoute>
+              <Games />
+            </PatientRoute>
+          }
+        />
 
-        {/* =========================
-            GAMES
-        ========================= */}
+        <Route
+          path="/reminders"
+          element={
+            <PatientRoute>
+              <Reminders />
+            </PatientRoute>
+          }
+        />
 
-        <Route path="/games/memory" element={<MemoryGame />} />
+        <Route
+          path="/profile"
+          element={
+            <PatientRoute>
+              <Profile />
+            </PatientRoute>
+          }
+        />
 
-        <Route path="/games/attention" element={<AttentionGame />} />
+        {/* ==================================
+            MEMORY GAME
+        ================================== */}
 
-        <Route path="/games/routine" element={<RoutineGame />} />
+        <Route
+          path="/games/memory"
+          element={
+            <PatientGameRoute>
+              <MemoryGame />
+            </PatientGameRoute>
+          }
+        />
 
-        <Route path="/games/recognition" element={<RecognitionGame />} />
+        {/* ==================================
+            ATTENTION / PUZZLE GAME
+        ================================== */}
 
-        {/* =========================
+        <Route
+          path="/games/attention"
+          element={
+            <PatientGameRoute>
+              <AttentionGame />
+            </PatientGameRoute>
+          }
+        />
+
+        {/* ==================================
+            ROUTINE GAME
+        ================================== */}
+
+        <Route
+          path="/games/routine"
+          element={
+            <PatientGameRoute>
+              <RoutineGame />
+            </PatientGameRoute>
+          }
+        />
+
+        {/* ==================================
+            RECOGNITION GAME
+        ================================== */}
+
+        <Route
+          path="/games/recognition"
+          element={
+            <PatientGameRoute>
+              <RecognitionGame />
+            </PatientGameRoute>
+          }
+        />
+
+        {/* ==================================
             RECALL SEQUENCE
-        ========================= */}
+        ================================== */}
 
         <Route
           path="/games/memory/recall-sequence"
-          element={<RecallSequenceGame />}
+          element={
+            <PatientGameRoute>
+              <RecallSequenceGame />
+            </PatientGameRoute>
+          }
         />
+
+        {/* ==================================
+            FALLBACK
+        ================================== */}
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,6 +1,22 @@
 const DB_NAME = "SmritiSetuDB";
 const STORE_NAME = "recognitionResults";
-const DB_VERSION = 1;
+const DB_VERSION = 3;
+
+// ======================================
+// GET CURRENT PATIENT
+// ======================================
+
+function getCurrentPatientId() {
+  return (
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null
+  );
+}
+
+// ======================================
+// OPEN DATABASE
+// ======================================
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -16,6 +32,11 @@ function openDB() {
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
+      const transaction = event.target.transaction;
+
+      // ======================================
+      // CREATE STORE
+      // ======================================
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, {
@@ -30,12 +51,53 @@ function openDB() {
         store.createIndex("playedAt", "playedAt", {
           unique: false,
         });
+
+        store.createIndex("patientKey", "patientKey", {
+          unique: false,
+        });
+      }
+
+      // ======================================
+      // EXISTING STORE UPGRADE
+      // ======================================
+      else {
+        const store = transaction.objectStore(STORE_NAME);
+
+        if (!store.indexNames.contains("synced")) {
+          store.createIndex("synced", "synced", {
+            unique: false,
+          });
+        }
+
+        if (!store.indexNames.contains("playedAt")) {
+          store.createIndex("playedAt", "playedAt", {
+            unique: false,
+          });
+        }
+
+        if (!store.indexNames.contains("patientKey")) {
+          store.createIndex("patientKey", "patientKey", {
+            unique: false,
+          });
+        }
       }
     };
   });
 }
 
+// ======================================
+// SAVE RECOGNITION RESULT
+// ======================================
+
 export async function saveRecognitionResult(result) {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    console.error("No logged-in patient found. Recognition result not saved.");
+
+    throw new Error("Patient authentication required.");
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -46,7 +108,21 @@ export async function saveRecognitionResult(result) {
     const data = {
       ...result,
 
+      // ======================================
+      // PATIENT IDENTIFICATION
+      // ======================================
+
+      patientKey,
+
+      // ======================================
+      // GAME INFORMATION
+      // ======================================
+
       gameType: "recognition",
+
+      // ======================================
+      // SYNC
+      // ======================================
 
       synced: false,
 
@@ -56,6 +132,11 @@ export async function saveRecognitionResult(result) {
     const request = store.add(data);
 
     request.onsuccess = () => {
+      console.log("Recognition result saved locally:", {
+        id: request.result,
+        patientKey,
+      });
+
       resolve(request.result);
     };
 
@@ -65,7 +146,19 @@ export async function saveRecognitionResult(result) {
   });
 }
 
+// ======================================
+// GET UNSYNCED RECOGNITION RESULTS
+// ======================================
+
 export async function getUnsyncedRecognitionResults() {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    console.log("No logged-in patient - no Recognition results to sync.");
+
+    return [];
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -78,7 +171,18 @@ export async function getUnsyncedRecognitionResults() {
     request.onsuccess = () => {
       const results = request.result || [];
 
-      resolve(results.filter((item) => item.synced === false));
+      /*
+          IMPORTANT:
+
+          Sirf current patient ke
+          unsynced results return honge.
+        */
+
+      const patientResults = results.filter(
+        (item) => item.synced === false && item.patientKey === patientKey,
+      );
+
+      resolve(patientResults);
     };
 
     request.onerror = () => {
@@ -86,6 +190,10 @@ export async function getUnsyncedRecognitionResults() {
     };
   });
 }
+
+// ======================================
+// MARK RESULT AS SYNCED
+// ======================================
 
 export async function markRecognitionResultSynced(id) {
   const db = await openDB();
@@ -124,7 +232,17 @@ export async function markRecognitionResultSynced(id) {
   });
 }
 
+// ======================================
+// GET ALL RECOGNITION RESULTS
+// ======================================
+
 export async function getAllRecognitionResults() {
+  const patientKey = getCurrentPatientId();
+
+  if (!patientKey) {
+    return [];
+  }
+
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
@@ -135,7 +253,13 @@ export async function getAllRecognitionResults() {
     const request = store.getAll();
 
     request.onsuccess = () => {
-      resolve(request.result || []);
+      const results = request.result || [];
+
+      /*
+          Patient ko sirf apna data milega.
+        */
+
+      resolve(results.filter((item) => item.patientKey === patientKey));
     };
 
     request.onerror = () => {

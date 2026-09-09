@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 import "./RoutineGame.css";
 import { saveRoutineResult } from "../../services/routineDb";
 
+// =================================
+// DYNAMIC IMAGE LOADING
+// =================================
+
 const imageModules = import.meta.glob("../../assets/states/assam/q*/img*.jpg", {
   eager: true,
   query: "?url",
@@ -24,6 +28,10 @@ function getImage(questionNumber, imageNumber) {
   return `/assets/states/assam/q${questionNumber}/img${imageNumber}.jpg`;
 }
 
+// =================================
+// ANSWERS & DIFFICULTY
+// =================================
+
 const answers = [0, 1, 2, 3, 0, 1, 2, 3, 1, 2];
 
 const difficulties = [
@@ -41,6 +49,10 @@ const difficulties = [
 
 const TOTAL_QUESTIONS = 10;
 
+// =================================
+// QUESTION BANK
+// =================================
+
 const questionBank = {};
 
 for (let i = 0; i < TOTAL_QUESTIONS; i++) {
@@ -57,14 +69,21 @@ for (let i = 0; i < TOTAL_QUESTIONS; i++) {
     ],
 
     answer: answers[i],
-
     difficulty: difficulties[i],
   };
 }
 
+// =================================
+// SHUFFLE
+// =================================
+
 function shuffle(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
+
+// =================================
+// MAIN GAME
+// =================================
 
 export default function RoutineGame() {
   const navigate = useNavigate();
@@ -101,13 +120,10 @@ export default function RoutineGame() {
   const [currentQuestion, setCurrentQuestion] = useState(1);
 
   const [currentQuestionKey, setCurrentQuestionKey] = useState(() => {
-    // First round
     if (previousMLDecision === "SAME") {
       return "q1";
     }
 
-    // Find a question matching
-    // previous ML difficulty
     const matchingQuestions = Object.keys(questionBank).filter(
       (key) => questionBank[key].difficulty === initialDifficulty,
     );
@@ -146,9 +162,7 @@ export default function RoutineGame() {
   // =================================
 
   const totalAttemptsRef = useRef(0);
-
   const correctAttemptsRef = useRef(0);
-
   const mistakesRef = useRef(0);
 
   const gameStartTimeRef = useRef(Date.now());
@@ -167,7 +181,7 @@ export default function RoutineGame() {
 
   useEffect(() => {
     setUsedQuestions([currentQuestionKey]);
-  }, []);
+  }, [currentQuestionKey]);
 
   // =================================
   // SHUFFLE OPTIONS
@@ -175,7 +189,6 @@ export default function RoutineGame() {
 
   useEffect(() => {
     setShuffledOptions(shuffle([0, 1, 2, 3]));
-
     setSelectedOption(null);
     setAnswerLocked(false);
   }, [currentQuestionKey]);
@@ -193,7 +206,7 @@ export default function RoutineGame() {
   }, []);
 
   // =================================
-  // GET NEXT QUESTION
+  // GET NEXT ADAPTIVE QUESTION
   // =================================
 
   function getNextAdaptiveQuestion(difficulty, alreadyUsed) {
@@ -217,21 +230,17 @@ export default function RoutineGame() {
   }
 
   // =================================
-  // GET ML PREDICTION
+  // ML PREDICTION
   // =================================
 
-  async function getMLDifficulty({
-    accuracy,
-    responseTime,
-    totalAttempts,
-    mistakes,
-    score,
-    previousScore,
-    difficulty,
-  }) {
+  async function getMLDifficulty(dataToPred) {
     try {
       const difficultyNumber =
-        difficulty === "easy" ? 1 : difficulty === "medium" ? 2 : 3;
+        dataToPred.difficulty === "easy"
+          ? 1
+          : dataToPred.difficulty === "medium"
+            ? 2
+            : 3;
 
       const response = await fetch(
         "http://localhost:5000/api/routine/difficulty/predict",
@@ -243,19 +252,8 @@ export default function RoutineGame() {
           },
 
           body: JSON.stringify({
+            ...dataToPred,
             current_difficulty: difficultyNumber,
-
-            accuracy,
-
-            response_time: responseTime,
-
-            total_attempts: totalAttempts,
-
-            mistakes,
-
-            score,
-
-            previous_score: previousScore,
           }),
         },
       );
@@ -323,32 +321,21 @@ export default function RoutineGame() {
 
       const result = {
         level: 1,
-
         totalQuestions: TOTAL_QUESTIONS,
-
         totalAttempts,
-
         correctAttempts,
-
         mistakes,
-
         score: finalScore,
-
         accuracy,
-
         responseTime,
-
         currentDifficulty,
-
         difficultyChange,
-
         previousScore,
-
         playedAt: new Date().toISOString(),
       };
 
       // =================================
-      // SAVE TO INDEXEDDB
+      // SAVE TO INDEXED DB
       // =================================
 
       await saveRoutineResult(result);
@@ -360,8 +347,6 @@ export default function RoutineGame() {
       localStorage.setItem("routinePreviousScore", String(finalScore));
 
       localStorage.setItem("routineLastDifficulty", difficultyChange);
-
-      console.log("Routine result saved:", result);
 
       return difficultyChange;
     } catch (error) {
@@ -383,7 +368,6 @@ export default function RoutineGame() {
     totalAttemptsRef.current += 1;
 
     setAnswerLocked(true);
-
     setSelectedOption(selectedIndex);
 
     const isCorrect = selectedIndex === question.answer;
@@ -399,15 +383,11 @@ export default function RoutineGame() {
 
       if (currentDifficulty === "easy") {
         nextDifficulty = "medium";
-      } else if (currentDifficulty === "medium") {
-        nextDifficulty = "hard";
       } else {
         nextDifficulty = "hard";
       }
 
       setScore((prevScore) => prevScore + 1);
-
-      setCurrentDifficulty(nextDifficulty);
     }
 
     // =================================
@@ -418,14 +398,12 @@ export default function RoutineGame() {
 
       if (currentDifficulty === "hard") {
         nextDifficulty = "medium";
-      } else if (currentDifficulty === "medium") {
-        nextDifficulty = "easy";
       } else {
         nextDifficulty = "easy";
       }
-
-      setCurrentDifficulty(nextDifficulty);
     }
+
+    setCurrentDifficulty(nextDifficulty);
 
     // =================================
     // LAST QUESTION
@@ -451,11 +429,6 @@ export default function RoutineGame() {
 
     timeoutRef.current = setTimeout(() => {
       const nextQuestionNumber = currentQuestion + 1;
-
-      // =================================
-      // Q2-Q10
-      // ML / RULE BASED ADAPTATION
-      // =================================
 
       setUsedQuestions((prevUsed) => {
         const nextKey = getNextAdaptiveQuestion(nextDifficulty, prevUsed);
@@ -498,7 +471,8 @@ export default function RoutineGame() {
       clearTimeout(timeoutRef.current);
     }
 
-    navigate("/games");
+    // Go to patient home
+    navigate("/patient");
   }
 
   // =================================
@@ -520,22 +494,24 @@ export default function RoutineGame() {
 
   if (finished) {
     return (
-      <div className="routine-page">
-        <div className="routine-result">
-          <div className="routine-result-icon">✓</div>
+      <div className="routine-page routine-result-page">
+        <div className="routine-game-container result-card">
+          <div className="routine-result-content">
+            <div className="routine-result-icon">✓</div>
 
-          <h2>Well Done!</h2>
+            <h2>Well Done!</h2>
 
-          <p className="routine-result-subtitle">
-            You completed the game successfully.
-          </p>
+            <p className="routine-result-subtitle">
+              You completed the game successfully.
+            </p>
 
-          <button
-            className="routine-main-menu"
-            onClick={() => navigate("/games")}
-          >
-            Go to Main Menu
-          </button>
+            <button
+              className="routine-main-menu"
+              onClick={() => navigate("/patient")}
+            >
+              Go to Main Menu
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -546,68 +522,82 @@ export default function RoutineGame() {
   // =================================
 
   return (
-    <div className="routine-page">
-      <div className="routine-game">
-        <div className="routine-header">
-          <button
-            className="routine-home-button"
-            onClick={openExitPopup}
-            aria-label="Exit game"
-          >
-            ←
-          </button>
+    <div className="routine-page routine-game-page">
+      <div className="routine-game-container">
+        {/* BACK BUTTON */}
 
-          <div className="routine-question-number">
-            Question {currentQuestion} of {TOTAL_QUESTIONS}
+        <button
+          className="routine-back-button"
+          onClick={openExitPopup}
+          aria-label="Exit game"
+        >
+          <span>‹ Back</span>
+        </button>
+
+        {/* GAME CARD */}
+
+        <div className="routine-game-card">
+          {/* HEADER */}
+
+          <div className="routine-card-header">
+            <div className="routine-title-container">
+              <span className="title-leaf-icon">🌿</span>
+
+              <h1 className="routine-question-title">Odd One Out</h1>
+
+              <span className="title-leaf-icon">🌿</span>
+            </div>
+
+            <div className="instruction-badge">
+              Spot the picture that is different.
+            </div>
+          </div>
+
+          {/* OPTIONS */}
+
+          <div className="routine-options-grid">
+            {shuffledOptions.map((imageIndex) => {
+              const imageNumber = imageIndex + 1;
+
+              const errorKey = `${question.id}-${imageNumber}`;
+
+              const isSelected = selectedOption === imageIndex;
+
+              const isCorrect = isSelected && imageIndex === question.answer;
+
+              return (
+                <button
+                  key={imageIndex}
+                  className={`
+                      routine-option-button
+                      ${isSelected ? "selected" : ""}
+                      ${isCorrect ? "correct" : ""}
+                    `}
+                  onClick={() => handleAnswer(imageIndex)}
+                  disabled={answerLocked}
+                >
+                  <div className="routine-option-image-wrapper">
+                    {!imageErrors[errorKey] ? (
+                      <img
+                        src={question.images[imageIndex]}
+                        alt={`Option ${imageNumber}`}
+                        className="routine-option-image"
+                        onError={() =>
+                          handleImageError(question.id, imageNumber)
+                        }
+                      />
+                    ) : (
+                      <div className="routine-image-error">Image not found</div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
-
-        <h1 className="routine-question">Find the one that is different</h1>
-
-        <div className="routine-options">
-          {shuffledOptions.map((imageIndex) => {
-            const imageNumber = imageIndex + 1;
-
-            const errorKey = `${question.id}-${imageNumber}`;
-
-            const isSelected = selectedOption === imageIndex;
-
-            const isCorrect = isSelected && imageIndex === question.answer;
-
-            return (
-              <button
-                key={imageIndex}
-                className={`
-                    routine-option
-                    ${isSelected ? "selected" : ""}
-                    ${isCorrect ? "correct" : ""}
-                  `}
-                onClick={() => handleAnswer(imageIndex)}
-                disabled={answerLocked}
-              >
-                {!imageErrors[errorKey] ? (
-                  <img
-                    src={question.images[imageIndex]}
-                    alt={`Option ${imageNumber}`}
-                    onError={() => handleImageError(question.id, imageNumber)}
-                  />
-                ) : (
-                  <div className="routine-image-error">Image not found</div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <button className="routine-exit-button" onClick={openExitPopup}>
-          <span>🚪</span>
-          Exit
-        </button>
       </div>
 
-      {/* =================================
-          EXIT POPUP
-      ================================= */}
+      {/* EXIT POPUP */}
 
       {showExitPopup && (
         <div className="routine-overlay">

@@ -3,6 +3,33 @@ import { getUnsyncedPuzzleResults, markPuzzleSynced } from "./puzzleDb";
 const API_URL = "http://localhost:5000/api/puzzle/save";
 
 // ========================================
+// AUTH HELPERS
+// ========================================
+
+function getAuth() {
+  const token =
+    localStorage.getItem("manasToken") ||
+    sessionStorage.getItem("manasToken") ||
+    null;
+
+  const role =
+    localStorage.getItem("manasRole") ||
+    sessionStorage.getItem("manasRole") ||
+    null;
+
+  const userId =
+    localStorage.getItem("manasUserId") ||
+    sessionStorage.getItem("manasUserId") ||
+    null;
+
+  return {
+    token,
+    role,
+    userId,
+  };
+}
+
+// ========================================
 // SYNC PUZZLE RESULTS
 // ========================================
 
@@ -10,6 +37,15 @@ export async function syncPuzzleResults() {
   // Offline hai toh sync mat karo
   if (!navigator.onLine) {
     console.log("Puzzle: Offline - sync skipped");
+
+    return;
+  }
+
+  const { token, role, userId } = getAuth();
+
+  // Sirf authenticated patient sync karega
+  if (!token || role !== "patient" || !userId) {
+    console.log("Puzzle: No authenticated patient session - sync skipped");
 
     return;
   }
@@ -25,27 +61,106 @@ export async function syncPuzzleResults() {
     }
 
     for (const result of results) {
-      const { id, synced, createdAt, ...gameData } = result;
+      try {
+        // ========================================
+        // EXTRA PATIENT SAFETY
+        // ========================================
 
-      const response = await fetch(API_URL, {
-        method: "POST",
+        if (result.patientKey !== userId) {
+          console.warn(
+            "Puzzle: Skipping result belonging to another patient:",
+            result.id,
+          );
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+          continue;
+        }
 
-        body: JSON.stringify(gameData),
-      });
+        // ========================================
+        // REMOVE LOCAL-ONLY FIELDS
+        // ========================================
 
-      if (!response.ok) {
-        throw new Error("Failed to sync Puzzle result");
+        const { id, synced, patientKey, createdAt, ...gameData } = result;
+
+        // ========================================
+        // SEND TO BACKEND
+        // ========================================
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
+
+          /*
+           * patientId frontend se nahi bhej rahe.
+           *
+           * Backend JWT se:
+           * req.user.id
+           *
+           * use karega.
+           */
+          body: JSON.stringify(gameData),
+        });
+
+        // ========================================
+        // AUTH ERROR
+        // ========================================
+
+        if (response.status === 401) {
+          throw new Error("Authentication expired");
+        }
+
+        // ========================================
+        // PERMISSION ERROR
+        // ========================================
+
+        if (response.status === 403) {
+          throw new Error("Permission denied");
+        }
+
+        // ========================================
+        // OTHER SERVER ERROR
+        // ========================================
+
+        if (!response.ok) {
+          let errorMessage = `Server returned ${response.status}`;
+
+          try {
+            const errorData = await response.json();
+
+            if (errorData?.message) {
+              errorMessage = errorData.message;
+            }
+          } catch {
+            // JSON response available nahi hai
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        // ========================================
+        // MARK AS SYNCED
+        // ========================================
+
+        await markPuzzleSynced(id);
+
+        console.log("Puzzle result synced:", id);
+      } catch (error) {
+        console.error(
+          `Puzzle result sync failed for ${result.id}:`,
+          error.message,
+        );
+
+        /*
+         * Failed result IndexedDB mein
+         * unsynced hi rahega.
+         *
+         * Next sync mein dobara try hoga.
+         */
       }
-
-      // MongoDB mein save hone ke baad
-      // IndexedDB record ko synced mark karo
-      await markPuzzleSynced(id);
-
-      console.log("Puzzle result synced:", id);
     }
   } catch (error) {
     console.error("Puzzle sync error:", error);
@@ -71,7 +186,9 @@ export function startPuzzleAutoSync() {
 
   // Har 30 seconds check
   const interval = setInterval(() => {
-    syncPuzzleResults();
+    if (navigator.onLine) {
+      syncPuzzleResults();
+    }
   }, 30000);
 
   // Cleanup

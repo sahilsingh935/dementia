@@ -2,10 +2,16 @@ const express = require("express");
 
 const RecallSequenceResult = require("../models/RecallSequenceResult");
 
+const { protect, patientOnly } = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
+// ========================================
 // SAVE RECALL SEQUENCE RESULT
-router.post("/save", async (req, res) => {
+// Patient only
+// ========================================
+
+router.post("/save", protect, patientOnly, async (req, res) => {
   try {
     const {
       level,
@@ -20,6 +26,9 @@ router.post("/save", async (req, res) => {
     } = req.body;
 
     const result = await RecallSequenceResult.create({
+      // JWT se logged-in patient ki ID
+      patientId: req.user.id,
+
       gameType: "recall_sequence",
       level,
       sequenceLength,
@@ -47,23 +56,14 @@ router.post("/save", async (req, res) => {
   }
 });
 
-// GET ALL RECALL SEQUENCE RESULTS
-router.get("/", async (req, res) => {
-  try {
-    const results = await RecallSequenceResult.find().sort({ playedAt: -1 });
-
-    res.json({
-      success: true,
-      data: results,
-    });
-  } catch (error) {
-    console.error("Recall Sequence fetch error:", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch Recall Sequence results",
-    });
-  }
-});
+// ========================================
+// GET RECALL SEQUENCE RESULTS
+// ========================================
+//
+// Abhi public GET hata rahe hain.
+// Caretaker ke liye baad mein dedicated
+// protected analytics endpoint banega.
+//
+// ========================================
 
 module.exports = router;

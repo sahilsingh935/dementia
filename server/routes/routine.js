@@ -1,6 +1,8 @@
 const express = require("express");
 const RoutineResult = require("../models/RoutineResult");
 
+const { protect, patientOnly } = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 /*
@@ -9,9 +11,12 @@ const router = express.Router();
   =========================
 */
 
-router.post("/results", async (req, res) => {
+router.post("/results", protect, patientOnly, async (req, res) => {
   try {
     const result = new RoutineResult({
+      // JWT se logged-in patient ki ID
+      patientId: req.user.id,
+
       gameType: "routine",
 
       level: req.body.level || 1,
@@ -60,24 +65,11 @@ router.post("/results", async (req, res) => {
   =========================
   GET ROUTINE RESULTS
   =========================
+
+  Public GET hata diya hai.
+  Caretaker ke liye baad mein
+  protected analytics endpoint banega.
+  =========================
 */
-
-router.get("/results", async (req, res) => {
-  try {
-    const results = await RoutineResult.find().sort({ playedAt: -1 });
-
-    res.json({
-      success: true,
-      results,
-    });
-  } catch (error) {
-    console.error("Routine result fetch error:", error);
-
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch Routine results",
-    });
-  }
-});
 
 module.exports = router;

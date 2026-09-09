@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 
 const recallSequenceResultSchema = new mongoose.Schema(
   {
+    // Kis patient ne game play kiya
+    patientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+
     gameType: {
       type: String,
       default: "recall_sequence",
