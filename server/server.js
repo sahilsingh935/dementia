@@ -50,11 +50,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3000",
-    ],
+    origin: true,
     credentials: true,
   }),
 );
@@ -66,7 +62,7 @@ app.use(express.json());
 // ===============================
 
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     message: "MANAS backend is running",
   });
 });
@@ -112,7 +108,7 @@ app.use("/api/routine/difficulty", routineDifficultyRoutes);
 // ===============================
 
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("SERVER ERROR:", err);
 
   res.status(500).json({
     message: "Internal server error",
@@ -125,6 +121,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`MANAS backend running on port ${PORT}`);
 });
