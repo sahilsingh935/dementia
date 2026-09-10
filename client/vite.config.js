@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
+  base: "/dementia/",
+
   plugins: [
     react(),
 
@@ -10,9 +12,9 @@ export default defineConfig({
       registerType: "autoUpdate",
 
       workbox: {
-        navigateFallback: "/index.html",
+        navigateFallback: "/dementia/index.html",
 
-        navigateFallbackAllowlist: [/^\/.*$/],
+        navigateFallbackAllowlist: [/^\/dementia\/.*$/],
 
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff2}"],
       },
@@ -22,14 +24,17 @@ export default defineConfig({
       },
 
       manifest: {
-        name: "SmritiSetu",
-        short_name: "SmritiSetu",
+        name: "MANAS",
+        short_name: "MANAS",
         description: "Offline-first dementia care application",
+
         theme_color: "#f4f7f6",
         background_color: "#f4f7f6",
+
         display: "standalone",
-        start_url: "/",
-        scope: "/",
+
+        start_url: "/dementia/",
+        scope: "/dementia/",
       },
     }),
   ],
