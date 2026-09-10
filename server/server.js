@@ -64,6 +64,13 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "MANAS backend is running",
+    status: "OK",
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    message: "MANAS backend is healthy",
   });
 });
 
