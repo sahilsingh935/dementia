@@ -10,7 +10,7 @@ import { saveRecognitionResult } from "../../services/recognitionDb";
 // --------------------------------
 
 const imageModules = import.meta.glob(
-  "../../assets/recognition/assam/*.{png,jpg,jpeg,webp}",
+  "../../assets/recognition/**/*.{png,jpg,jpeg,webp}",
   {
     eager: true,
     query: "?url",
@@ -18,27 +18,64 @@ const imageModules = import.meta.glob(
   },
 );
 
-function getImage(fileName) {
+const STATE_FOLDER_MAP = {
+  Assam: "assam",
+  Manipur: "manipur",
+  Meghalaya: "meghalaya",
+  Mizoram: "mizoram",
+  Nagaland: "nagaland",
+  Tripura: "tripura",
+  Sikkim: "sikkim",
+  "Arunachal Pradesh": "arunachal",
+};
+
+function getSelectedState() {
+  return (
+    localStorage.getItem("manasState") ||
+    sessionStorage.getItem("manasState") ||
+    "Assam"
+  );
+}
+
+function getStateFolder(state) {
+  return STATE_FOLDER_MAP[state] || "assam";
+}
+
+function getImage(fileName, state = "Assam") {
   if (!fileName) return "";
 
   const target = fileName
+    .replace(/^.*[\\/]/, "")
     .replace(/\.(jpg|jpeg|png|webp)$/i, "")
     .toLowerCase()
     .trim();
 
-  const foundKey = Object.keys(imageModules).find((key) => {
-    const actualFileName = key
-      .replace(/\\/g, "/")
-      .split("/")
-      .pop()
-      .replace(/\.(jpg|jpeg|png|webp)$/i, "")
-      .toLowerCase()
-      .trim();
+  const entries = Object.entries(imageModules);
 
-    return actualFileName === target;
-  });
+  function findInFolder(folder) {
+    return entries.find(([key]) => {
+      const normalized = key.replace(/\\/g, "/").toLowerCase();
+      const actualFileName = normalized
+        .split("/")
+        .pop()
+        .replace(/\.(jpg|jpeg|png|webp)$/i, "")
+        .trim();
 
-  return foundKey ? imageModules[foundKey] : "";
+      return (
+        normalized.includes(`/recognition/${folder}/`) &&
+        actualFileName === target
+      );
+    });
+  }
+
+  const stateMatch = findInFolder(getStateFolder(state));
+  if (stateMatch) return stateMatch[1];
+
+  const commonMatch = findInFolder("common");
+  if (commonMatch) return commonMatch[1];
+
+  const assamMatch = findInFolder("assam");
+  return assamMatch ? assamMatch[1] : "";
 }
 
 // --------------------------------
@@ -56,304 +93,676 @@ function shuffle(array) {
 const questionBank = {
   Assam: [
     {
-      category: "Food",
-      question: "Which of these is a traditional Assamese drink?",
-      hint: "It is a popular drink made from tea leaves.",
-      difficulty: "easy",
-      options: [
-        {
-          label: "Assam Tea",
-          value: "assam_tea",
-          image: "assam_tea",
-        },
-        {
-          label: "Bihu",
-          value: "bihu",
-          image: "bihu",
-        },
-        {
-          label: "Gamosa",
-          value: "gamosa",
-          image: "gamosa",
-        },
-      ],
-      answer: "assam_tea",
-    },
-
-    {
-      category: "Food",
-      question: "Which image shows an Assamese traditional meal?",
-      hint: "Look for a meal served with several traditional dishes.",
-      difficulty: "easy",
-      options: [
-        {
-          label: "Assamese Thali",
-          value: "assamese_thali",
-          image: "assamese_thali",
-        },
-        {
-          label: "Brahmaputra",
-          value: "brahmaputra",
-          image: "brahmaputra",
-        },
-        {
-          label: "Bihu Dance",
-          value: "bihu_dance",
-          image: "bihu_dance",
-        },
-      ],
-      answer: "assamese_thali",
-    },
-
-    {
-      category: "Festival",
+      category: "Culture",
       question: "Which festival is strongly associated with Assam?",
-      hint: "It is one of the most important festivals of Assam.",
+      hint: "It is celebrated with music and dance.",
       difficulty: "easy",
       options: [
-        {
-          label: "Bihu",
-          value: "bihu",
-          image: "bihu",
-        },
-        {
-          label: "Pitha",
-          value: "pitha",
-          image: "pitha",
-        },
-        {
-          label: "Gamosa",
-          value: "gamosa",
-          image: "gamosa",
-        },
+        { label: "Bihu", value: "bihu", image: "bihu" },
+        { label: "Onam", value: "onam", image: "onam" },
+        { label: "Pongal", value: "pongal", image: "pongal" },
       ],
       answer: "bihu",
     },
-
-    {
-      category: "Culture",
-      question:
-        "Which image shows people performing a traditional Assamese dance?",
-      hint: "Look at the group of people dressed traditionally.",
-      difficulty: "easy",
-      options: [
-        {
-          label: "Bihu Dance",
-          value: "bihu_dance",
-          image: "bihu_dance",
-        },
-        {
-          label: "Jolpan",
-          value: "jolpan",
-          image: "jolpan",
-        },
-        {
-          label: "Kaziranga",
-          value: "kaziranga",
-          image: "kaziranga",
-        },
-      ],
-      answer: "bihu_dance",
-    },
-
     {
       category: "Nature",
       question: "Which famous river is associated with Assam?",
       hint: "It is one of the major rivers flowing through Assam.",
       difficulty: "easy",
       options: [
-        {
-          label: "Brahmaputra",
-          value: "brahmaputra",
-          image: "brahmaputra",
-        },
-        {
-          label: "Pitha",
-          value: "pitha",
-          image: "pitha",
-        },
-        {
-          label: "Gamosa",
-          value: "gamosa",
-          image: "gamosa",
-        },
+        { label: "Brahmaputra", value: "brahmaputra", image: "brahmaputra" },
+        { label: "Yamuna", value: "yamuna", image: "yamuna" },
+        { label: "Narmada", value: "narmada", image: "narmada" },
       ],
       answer: "brahmaputra",
     },
-
     {
-      category: "Culture",
-      question: "Which traditional Assamese cloth is shown in the image?",
-      hint: "It is a well-known symbol of Assamese culture.",
+      category: "Food",
+      question: "Which traditional Assamese food is often made from rice?",
+      hint: "It is a familiar traditional food.",
       difficulty: "easy",
       options: [
-        {
-          label: "Gamosa",
-          value: "gamosa",
-          image: "gamosa",
-        },
-        {
-          label: "Kaziranga",
-          value: "kaziranga",
-          image: "kaziranga",
-        },
-        {
-          label: "Assam Tea",
-          value: "assam_tea",
-          image: "assam_tea",
-        },
-      ],
-      answer: "gamosa",
-    },
-
-    {
-      category: "Food",
-      question: "Which image shows a traditional Assamese snack or breakfast?",
-      hint: "It is commonly associated with traditional Assamese food.",
-      difficulty: "medium",
-      options: [
-        {
-          label: "Jolpan",
-          value: "jolpan",
-          image: "jolpan",
-        },
-        {
-          label: "Bihu Dance",
-          value: "bihu_dance",
-          image: "bihu_dance",
-        },
-        {
-          label: "Brahmaputra",
-          value: "brahmaputra",
-          image: "brahmaputra",
-        },
-      ],
-      answer: "jolpan",
-    },
-
-    {
-      category: "Wildlife",
-      question: "Which famous national park is represented in this image?",
-      hint: "It is famous for the one-horned rhinoceros.",
-      difficulty: "medium",
-      options: [
-        {
-          label: "Kaziranga",
-          value: "kaziranga",
-          image: "kaziranga",
-        },
-        {
-          label: "Majuli",
-          value: "majuli",
-          image: "brahmaputra",
-        },
-        {
-          label: "Bihu",
-          value: "bihu",
-          image: "bihu",
-        },
-      ],
-      answer: "kaziranga",
-    },
-
-    {
-      category: "Clothing",
-      question: "Which traditional Assamese garment is shown here?",
-      hint: "It is traditionally worn by women in Assam.",
-      difficulty: "medium",
-      options: [
-        {
-          label: "Mekhela Chador",
-          value: "mekhela_chador",
-          image: "mekhela_chador",
-        },
-        {
-          label: "Gamosa",
-          value: "gamosa",
-          image: "gamosa",
-        },
-        {
-          label: "Pitha",
-          value: "pitha",
-          image: "pitha",
-        },
-      ],
-      answer: "mekhela_chador",
-    },
-
-    {
-      category: "Wildlife",
-      question: "Which animal is shown in the image?",
-      hint: "This animal is strongly associated with Kaziranga.",
-      difficulty: "medium",
-      options: [
-        {
-          label: "One-horned Rhinoceros",
-          value: "one_horned_rhino",
-          image: "one_horned_rhino",
-        },
-        {
-          label: "Tiger",
-          value: "tiger",
-          image: "kaziranga",
-        },
-        {
-          label: "Elephant",
-          value: "elephant",
-          image: "brahmaputra",
-        },
-      ],
-      answer: "one_horned_rhino",
-    },
-
-    {
-      category: "Food",
-      question: "Which traditional Assamese food is shown in this image?",
-      hint: "It is a popular traditional rice-based preparation.",
-      difficulty: "medium",
-      options: [
-        {
-          label: "Pitha",
-          value: "pitha",
-          image: "pitha",
-        },
-        {
-          label: "Gamosa",
-          value: "gamosa",
-          image: "gamosa",
-        },
-        {
-          label: "Bihu",
-          value: "bihu",
-          image: "bihu",
-        },
+        { label: "Pitha", value: "pitha", image: "pitha" },
+        { label: "Dosa", value: "dosa", image: "dosa" },
+        { label: "Cake", value: "cake", image: "cake" },
       ],
       answer: "pitha",
     },
-
     {
-      category: "Food",
-      question: "Which image shows a traditional Assamese food item?",
-      hint: "It is associated with traditional Assamese meals.",
+      category: "Nature",
+      question: "Which animal is famous in Kaziranga?",
+      hint: "It has one large horn.",
       difficulty: "medium",
       options: [
         {
-          label: "Jolpan",
-          value: "jolpan",
-          image: "jolpan",
+          label: "One-horned rhinoceros",
+          value: "one_horned_rhino",
+          image: "one_horned_rhino",
         },
+        { label: "Camel", value: "camel", image: "camel" },
+        { label: "Penguin", value: "penguin", image: "penguin" },
+      ],
+      answer: "one_horned_rhino",
+    },
+    {
+      category: "Crafts",
+      question: "Which type of silk is exclusive to Assam?",
+      hint: "It is naturally golden in color.",
+      difficulty: "medium",
+      options: [
+        { label: "Muga Silk", value: "muga_silk", image: "muga_silk" },
+        { label: "Cotton", value: "cotton", image: "cotton" },
+        { label: "Polyester", value: "polyester", image: "polyester" },
+      ],
+      answer: "muga_silk",
+    },
+    {
+      category: "History",
+      question: "Which historical dynasty ruled Assam for nearly 600 years?",
+      hint: "They built the Rang Ghar.",
+      difficulty: "hard",
+      options: [
+        { label: "Ahom Dynasty", value: "ahom_dynasty", image: "ahom_dynasty" },
+        { label: "Mughal Empire", value: "mughal", image: "mughal" },
+        { label: "Maurya Empire", value: "maurya", image: "maurya" },
+      ],
+      answer: "ahom_dynasty",
+    },
+  ],
+  Meghalaya: [
+    {
+      category: "Food",
+      question: "Which traditional food is associated with Meghalaya?",
+      hint: "It is a Khasi rice preparation.",
+      difficulty: "easy",
+      options: [
+        { label: "Jadoh", value: "jadoh", image: "jadoh" },
+        { label: "Dosa", value: "dosa", image: "dosa" },
+        { label: "Idli", value: "idli", image: "idli" },
+      ],
+      answer: "jadoh",
+    },
+    {
+      category: "Nature",
+      question: "Which natural structure is famous in Meghalaya?",
+      hint: "It is made using living tree roots.",
+      difficulty: "easy",
+      options: [
         {
-          label: "Mekhela Chador",
-          value: "mekhela_chador",
-          image: "mekhela_chador",
+          label: "Living root bridge",
+          value: "living_root_bridge",
+          image: "living_root_bridge",
         },
+        { label: "Stone castle", value: "castle", image: "castle" },
+        { label: "Desert", value: "desert", image: "desert" },
+      ],
+      answer: "living_root_bridge",
+    },
+    {
+      category: "Nature",
+      question: "Which place is famous for heavy rainfall?",
+      hint: "It is near the Khasi Hills.",
+      difficulty: "easy",
+      options: [
+        { label: "Cherrapunji", value: "cherrapunji", image: "cherrapunji" },
+        { label: "Jaisalmer", value: "jaisalmer", image: "jaisalmer" },
+        { label: "Jaipur", value: "jaipur", image: "jaipur" },
+      ],
+      answer: "cherrapunji",
+    },
+    {
+      category: "Landmark",
+      question: "Which glass-like clear river is famous in Dawki?",
+      hint: "It is located near the Bangladesh border.",
+      difficulty: "medium",
+      options: [
+        { label: "Umngot River", value: "umngot", image: "umngot" },
+        { label: "Ganges", value: "ganges", image: "ganges" },
+        { label: "Yamuna", value: "yamuna", image: "yamuna" },
+      ],
+      answer: "umngot",
+    },
+    {
+      category: "Culture",
+      question:
+        "Which Khasi festival is celebrated with traditional dance in Smit?",
+      hint: "It is a festival of thanksgiving.",
+      difficulty: "medium",
+      options: [
+        { label: "Nongkrem Dance", value: "nongkrem", image: "nongkrem" },
+        { label: "Garba", value: "garba", image: "garba" },
+        { label: "Bhangra", value: "bhangra", image: "bhangra" },
+      ],
+      answer: "nongkrem",
+    },
+    {
+      category: "Culture",
+      question:
+        "Which Jaintia festival is celebrated to drive away plague and bad spirits?",
+      hint: "It involves colorful wooden towers called Rot.",
+      difficulty: "hard",
+      options: [
+        { label: "Behdienkhlam", value: "behdienkhlam", image: "behdienkhlam" },
+        { label: "Chhath Puja", value: "chhath", image: "chhath" },
+        { label: "Durga Puja", value: "durga_puja", image: "durga_puja" },
+      ],
+      answer: "behdienkhlam",
+    },
+  ],
+  Manipur: [
+    {
+      category: "Nature",
+      question: "Which famous lake is in Manipur?",
+      hint: "It has floating islands called phumdis.",
+      difficulty: "easy",
+      options: [
+        { label: "Loktak Lake", value: "loktak_lake", image: "loktak_lake" },
+        { label: "Dal Lake", value: "dal_lake", image: "dal_lake" },
+        { label: "Chilika Lake", value: "chilika_lake", image: "chilika_lake" },
+      ],
+      answer: "loktak_lake",
+    },
+    {
+      category: "Nature",
+      question: "Which deer is famous in Manipur?",
+      hint: "It is associated with Keibul Lamjao.",
+      difficulty: "easy",
+      options: [
+        { label: "Sangai", value: "sangai", image: "sangai" },
+        { label: "Camel", value: "camel", image: "camel" },
+        { label: "Yak", value: "yak", image: "yak" },
+      ],
+      answer: "sangai",
+    },
+    {
+      category: "Culture",
+      question: "Which dance is traditionally associated with Manipur?",
+      hint: "It is a classical Indian dance.",
+      difficulty: "easy",
+      options: [
         {
-          label: "Kaziranga",
-          value: "kaziranga",
-          image: "kaziranga",
+          label: "Manipuri dance",
+          value: "manipuri_dance",
+          image: "manipuri_dance",
+        },
+        { label: "Kathakali", value: "kathakali", image: "kathakali" },
+        { label: "Bhangra", value: "bhangra", image: "bhangra" },
+      ],
+      answer: "manipuri_dance",
+    },
+    {
+      category: "Market",
+      question: "Which famous market in Imphal is run mainly by women?",
+      hint: "Its name means Mother's Market.",
+      difficulty: "medium",
+      options: [
+        { label: "Ima Keithel", value: "ima_market", image: "ima_market" },
+        {
+          label: "Chandni Chowk",
+          value: "chandni_chowk",
+          image: "chandni_chowk",
+        },
+        { label: "Sunday Market", value: "market", image: "market" },
+      ],
+      answer: "ima_market",
+    },
+    {
+      category: "Sports",
+      question: "Which martial art form originated in Manipur?",
+      hint: "It involves sword and spear techniques.",
+      difficulty: "medium",
+      options: [
+        { label: "Thang-Ta", value: "thang_ta", image: "thang_ta" },
+        { label: "Karate", value: "karate", image: "karate" },
+        { label: "Judo", value: "judo", image: "judo" },
+      ],
+      answer: "thang_ta",
+    },
+    {
+      category: "Crafts",
+      question:
+        "Which black pottery technique from Longpi village uses no potter's wheel?",
+      hint: "It is made from serpentinite rock and clay.",
+      difficulty: "hard",
+      options: [
+        { label: "Longpi Pottery", value: "longpi", image: "longpi" },
+        { label: "Blue Pottery", value: "blue_pottery", image: "blue_pottery" },
+        { label: "Terracotta", value: "terracotta", image: "terracotta" },
+      ],
+      answer: "longpi",
+    },
+  ],
+  Nagaland: [
+    {
+      category: "Culture",
+      question: "Which famous festival is celebrated in Nagaland?",
+      hint: "It brings together many Naga tribes.",
+      difficulty: "easy",
+      options: [
+        {
+          label: "Hornbill Festival",
+          value: "hornbill_dance",
+          image: "hornbill_dance",
+        },
+        { label: "Bihu", value: "bihu", image: "bihu" },
+        { label: "Onam", value: "onam", image: "onam" },
+      ],
+      answer: "hornbill_dance",
+    },
+    {
+      category: "Food",
+      question: "Which ingredient is famous in Naga cuisine?",
+      hint: "It is fermented soybean.",
+      difficulty: "easy",
+      options: [
+        { label: "Akhuni", value: "akhuni", image: "akhuni" },
+        { label: "Curd", value: "curd", image: "curd" },
+        { label: "Jam", value: "jam", image: "jam" },
+      ],
+      answer: "akhuni",
+    },
+    {
+      category: "Clothing",
+      question: "What is often part of traditional Naga clothing?",
+      hint: "It is worn around the body.",
+      difficulty: "easy",
+      options: [
+        { label: "Naga shawl", value: "naga_shawl", image: "naga_shawl" },
+        { label: "Swimsuit", value: "swimsuit", image: "swimsuit" },
+        {
+          label: "School uniform",
+          value: "school_uniform",
+          image: "school_uniform",
         },
       ],
-      answer: "jolpan",
+      answer: "naga_shawl",
+    },
+    {
+      category: "Nature",
+      question:
+        "Which high valley in Nagaland is famous for its lily and trekking trails?",
+      hint: "It is located at the border of Nagaland and Manipur.",
+      difficulty: "medium",
+      options: [
+        {
+          label: "Dzukou Valley",
+          value: "dzukou_valley",
+          image: "dzukou_valley",
+        },
+        { label: "Kashmir Valley", value: "kashmir", image: "kashmir" },
+        {
+          label: "Silent Valley",
+          value: "silent_valley",
+          image: "silent_valley",
+        },
+      ],
+      answer: "dzukou_valley",
+    },
+    {
+      category: "Food",
+      question: "Which extremely spicy chili is native to Nagaland?",
+      hint: "It is also known as Ghost Pepper.",
+      difficulty: "medium",
+      options: [
+        { label: "Bhut Jolokia", value: "bhut_jolokia", image: "bhut_jolokia" },
+        { label: "Capsicum", value: "capsicum", image: "capsicum" },
+        { label: "Black Pepper", value: "black_pepper", image: "black_pepper" },
+      ],
+      answer: "bhut_jolokia",
+    },
+    {
+      category: "History",
+      question:
+        "Which WWII memorial in Kohima honors soldiers with a famous epitaph?",
+      hint: "It is an important historic memorial.",
+      difficulty: "hard",
+      options: [
+        {
+          label: "Kohima War Cemetery",
+          value: "war_cemetery",
+          image: "war_cemetery",
+        },
+        { label: "India Gate", value: "india_gate", image: "india_gate" },
+        {
+          label: "Jallianwala Bagh",
+          value: "jallianwala",
+          image: "jallianwala",
+        },
+      ],
+      answer: "war_cemetery",
+    },
+  ],
+  Tripura: [
+    {
+      category: "Food",
+      question: "Which ingredient is important in traditional Tripura food?",
+      hint: "It is a fermented fish ingredient.",
+      difficulty: "easy",
+      options: [
+        { label: "Berma", value: "berma", image: "berma" },
+        { label: "Chocolate", value: "chocolate", image: "chocolate" },
+        { label: "Cheese", value: "cheese", image: "cheese" },
+      ],
+      answer: "berma",
+    },
+    {
+      category: "Culture",
+      question: "Which festival is associated with Tripura?",
+      hint: "It is an important traditional festival.",
+      difficulty: "easy",
+      options: [
+        { label: "Kharchi Puja", value: "kharchi_puja", image: "kharchi_puja" },
+        { label: "Bihu", value: "bihu", image: "bihu" },
+        { label: "Onam", value: "onam", image: "onam" },
+      ],
+      answer: "kharchi_puja",
+    },
+    {
+      category: "Landmark",
+      question: "Which famous palace is in Agartala?",
+      hint: "It is a well-known landmark.",
+      difficulty: "easy",
+      options: [
+        {
+          label: "Ujjayanta Palace",
+          value: "ujjayanta_palace",
+          image: "ujjayanta_palace",
+        },
+        { label: "Taj Mahal", value: "taj_mahal", image: "taj_mahal" },
+        { label: "Red Fort", value: "red_fort", image: "red_fort" },
+      ],
+      answer: "ujjayanta_palace",
+    },
+    {
+      category: "Landmark",
+      question:
+        "Which archaeological site in Tripura features rock-cut carvings of Hindu deities?",
+      hint: "It is located in the Unakoti district.",
+      difficulty: "medium",
+      options: [
+        { label: "Unakoti", value: "unakoti", image: "unakoti" },
+        { label: "Ajanta", value: "ajanta", image: "ajanta" },
+        {
+          label: "Mahabalipuram",
+          value: "mahabalipuram",
+          image: "mahabalipuram",
+        },
+      ],
+      answer: "unakoti",
+    },
+    {
+      category: "Food",
+      question:
+        "Which traditional Tripura dish is prepared by boiling vegetables without oil?",
+      hint: "It is a traditional oil-free stew.",
+      difficulty: "medium",
+      options: [
+        { label: "Mui Borok", value: "mui_borok", image: "mui_borok" },
+        { label: "Fried Rice", value: "fried_rice", image: "fried_rice" },
+        { label: "French Fries", value: "fries", image: "fries" },
+      ],
+      answer: "mui_borok",
+    },
+    {
+      category: "History",
+      question: "Which royal kingdom dynasty ruled Tripura for centuries?",
+      hint: "It was the historic ruling dynasty of Tripura.",
+      difficulty: "hard",
+      options: [
+        {
+          label: "Manikya Dynasty",
+          value: "manikya_dynasty",
+          image: "manikya_dynasty",
+        },
+        { label: "Chola Dynasty", value: "chola", image: "chola" },
+        { label: "Gupta Dynasty", value: "gupta", image: "gupta" },
+      ],
+      answer: "manikya_dynasty",
+    },
+  ],
+  "Arunachal Pradesh": [
+    {
+      category: "Food",
+      question: "Which noodle soup is popular in Arunachal Pradesh?",
+      hint: "It is a warm noodle dish.",
+      difficulty: "easy",
+      options: [
+        { label: "Thukpa", value: "thukpa", image: "thukpa" },
+        { label: "Pizza", value: "pizza", image: "pizza" },
+        { label: "Dosa", value: "dosa", image: "dosa" },
+      ],
+      answer: "thukpa",
+    },
+    {
+      category: "Food",
+      question: "Which traditional flatbread is associated with Arunachal?",
+      hint: "It can be made from buckwheat flour.",
+      difficulty: "easy",
+      options: [
+        { label: "Khura", value: "khura", image: "khura" },
+        { label: "Idli", value: "idli", image: "idli" },
+        { label: "Appam", value: "appam", image: "appam" },
+      ],
+      answer: "khura",
+    },
+    {
+      category: "Culture",
+      question: "Which famous monastery is in Tawang?",
+      hint: "It is one of the best-known monasteries in the region.",
+      difficulty: "easy",
+      options: [
+        {
+          label: "Tawang Monastery",
+          value: "tawang_monastery",
+          image: "tawang_monastery",
+        },
+        {
+          label: "Golden Temple",
+          value: "golden_temple",
+          image: "golden_temple",
+        },
+        { label: "Lotus Temple", value: "lotus_temple", image: "lotus_temple" },
+      ],
+      answer: "tawang_monastery",
+    },
+    {
+      category: "Nature",
+      question:
+        "Which high mountain pass connects Tawang to the rest of India?",
+      hint: "It is a high mountain pass near Tawang.",
+      difficulty: "medium",
+      options: [
+        { label: "Sela Pass", value: "sela_pass", image: "sela_pass" },
+        { label: "Rohtang Pass", value: "rohtang", image: "rohtang" },
+        { label: "Nathu La", value: "nathula", image: "nathula" },
+      ],
+      answer: "sela_pass",
+    },
+    {
+      category: "Culture",
+      question:
+        "Which festival is celebrated by the Apatani tribe in Ziro Valley?",
+      hint: "It is celebrated for a good harvest.",
+      difficulty: "medium",
+      options: [
+        {
+          label: "Dree Festival",
+          value: "dree_festival",
+          image: "dree_festival",
+        },
+        { label: "Baisakhi", value: "baisakhi", image: "baisakhi" },
+        { label: "Navratri", value: "navratri", image: "navratri" },
+      ],
+      answer: "dree_festival",
+    },
+    {
+      category: "History",
+      question:
+        "Which ancient archaeological fort site near Itanagar dates back to the 14th century?",
+      hint: "Its name means Fort of Bricks.",
+      difficulty: "hard",
+      options: [
+        { label: "Ita Fort", value: "ita_fort", image: "ita_fort" },
+        { label: "Red Fort", value: "red_fort", image: "red_fort" },
+        { label: "Mehrangarh", value: "mehrangarh", image: "mehrangarh" },
+      ],
+      answer: "ita_fort",
+    },
+  ],
+  Mizoram: [
+    {
+      category: "Food",
+      question: "Which traditional Mizo food is made with vegetables?",
+      hint: "It is a well-known Mizo dish.",
+      difficulty: "easy",
+      options: [
+        { label: "Bai", value: "bai", image: "bai" },
+        { label: "Dosa", value: "dosa", image: "dosa" },
+        { label: "Pizza", value: "pizza", image: "pizza" },
+      ],
+      answer: "bai",
+    },
+    {
+      category: "Culture",
+      question: "Which festival is famous in Mizoram?",
+      hint: "It is a traditional spring festival.",
+      difficulty: "easy",
+      options: [
+        { label: "Chapchar Kut", value: "chapchar_kut", image: "chapchar_kut" },
+        { label: "Bihu", value: "bihu", image: "bihu" },
+        { label: "Onam", value: "onam", image: "onam" },
+      ],
+      answer: "chapchar_kut",
+    },
+    {
+      category: "Culture",
+      question: "Which dance is known as the bamboo dance?",
+      hint: "Dancers move between bamboo poles.",
+      difficulty: "easy",
+      options: [
+        { label: "Cheraw", value: "cheraw", image: "cheraw" },
+        { label: "Garba", value: "garba", image: "garba" },
+        { label: "Bhangra", value: "bhangra", image: "bhangra" },
+      ],
+      answer: "cheraw",
+    },
+    {
+      category: "Nature",
+      question:
+        "Which highest peak in Mizoram is also known as the Blue Mountain?",
+      hint: "It is also known as the Blue Mountain.",
+      difficulty: "medium",
+      options: [
+        { label: "Phawngpui", value: "phawngpui", image: "phawngpui" },
+        { label: "Anamudi", value: "anamudi", image: "anamudi" },
+        { label: "Doddabetta", value: "doddabetta", image: "doddabetta" },
+      ],
+      answer: "phawngpui",
+    },
+    {
+      category: "Landmark",
+      question: "Which famous lake in Mizoram is shaped like a heart?",
+      hint: "It is a heart-shaped lake.",
+      difficulty: "medium",
+      options: [
+        { label: "Rih Dil", value: "rih_dil", image: "rih_dil" },
+        { label: "Dal Lake", value: "dal_lake", image: "dal_lake" },
+        { label: "Naini Lake", value: "naini", image: "naini" },
+      ],
+      answer: "rih_dil",
+    },
+    {
+      category: "Culture",
+      question:
+        "Which traditional Mizo dance involves gong music and warrior movements?",
+      hint: "It is a traditional warrior dance.",
+      difficulty: "hard",
+      options: [
+        { label: "Sarlamkai", value: "sarlamkai", image: "sarlamkai" },
+        { label: "Chhau", value: "chhau", image: "chhau" },
+        { label: "Koli Dance", value: "koli", image: "koli" },
+      ],
+      answer: "sarlamkai",
+    },
+  ],
+  Sikkim: [
+    {
+      category: "Food",
+      question: "Which food is very popular in Sikkim?",
+      hint: "It is a popular steamed dumpling.",
+      difficulty: "easy",
+      options: [
+        { label: "Momos", value: "momos", image: "momos" },
+        { label: "Pizza", value: "pizza", image: "pizza" },
+        { label: "Idli", value: "idli", image: "idli" },
+      ],
+      answer: "momos",
+    },
+    {
+      category: "Food",
+      question: "Which noodle soup is popular in Sikkim?",
+      hint: "It is warm and contains noodles.",
+      difficulty: "easy",
+      options: [
+        { label: "Thukpa", value: "thukpa", image: "thukpa" },
+        { label: "Dosa", value: "dosa", image: "dosa" },
+        { label: "Pitha", value: "pitha", image: "pitha" },
+      ],
+      answer: "thukpa",
+    },
+    {
+      category: "Nature",
+      question: "Which famous mountain is associated with Sikkim?",
+      hint: "It is one of the world's highest mountains.",
+      difficulty: "easy",
+      options: [
+        { label: "Kanchenjunga", value: "kanchenjunga", image: "kanchenjunga" },
+        { label: "Aravalli", value: "aravalli", image: "aravalli" },
+        { label: "Nilgiri", value: "nilgiri", image: "nilgiri" },
+      ],
+      answer: "kanchenjunga",
+    },
+    {
+      category: "Culture",
+      question:
+        "Which famous monastery in Gangtok is the seat of the Karmapa Lama?",
+      hint: "It is a famous Buddhist monastery near Gangtok.",
+      difficulty: "medium",
+      options: [
+        { label: "Rumtek Monastery", value: "rumtek", image: "rumtek" },
+        { label: "Tawang Monastery", value: "tawang", image: "tawang" },
+        { label: "Diskit Monastery", value: "diskit", image: "diskit" },
+      ],
+      answer: "rumtek",
+    },
+    {
+      category: "Nature",
+      question:
+        "Which sacred high-altitude lake in North Sikkim is among the highest in the world?",
+      hint: "It is a sacred high-altitude lake in North Sikkim.",
+      difficulty: "medium",
+      options: [
+        {
+          label: "Gurudongmar Lake",
+          value: "gurudongmar",
+          image: "gurudongmar",
+        },
+        { label: "Wular Lake", value: "wular", image: "wular" },
+        { label: "Pangong Lake", value: "pangong", image: "pangong" },
+      ],
+      answer: "gurudongmar",
+    },
+    {
+      category: "Culture",
+      question: "Which Sikkim mask dance festival is performed by monks?",
+      hint: "It is a sacred ritual mask dance.",
+      difficulty: "hard",
+      options: [
+        { label: "Chaam Dance", value: "chaam", image: "chaam" },
+        { label: "Kathak", value: "kathak", image: "kathak" },
+        { label: "Bhangra", value: "bhangra", image: "bhangra" },
+      ],
+      answer: "chaam",
     },
   ],
 };
@@ -362,8 +771,8 @@ const questionBank = {
 // CREATE GAME QUESTIONS
 // --------------------------------
 
-function createGameQuestions(difficulty) {
-  const bank = questionBank.Assam;
+function createGameQuestions(difficulty, state = "Assam") {
+  const bank = questionBank[state] || questionBank.Assam;
 
   let filteredQuestions;
 
@@ -395,6 +804,8 @@ function createGameQuestions(difficulty) {
 
 export default function RecognitionGame() {
   const navigate = useNavigate();
+
+  const selectedState = getSelectedState();
 
   const [screen, setScreen] = useState("quiz");
 
@@ -444,7 +855,7 @@ export default function RecognitionGame() {
 
     setCurrentLevel(1);
 
-    setQuestions(createGameQuestions("easy"));
+    setQuestions(createGameQuestions("easy", selectedState));
 
     gameStartTimeRef.current = Date.now();
 
@@ -654,6 +1065,7 @@ export default function RecognitionGame() {
         difficultyScore: mlResult.difficultyScore,
 
         difficultyChange: mlResult.difficultyChange,
+        state: selectedState,
       });
 
       console.log("Recognition result saved to IndexedDB");
@@ -861,6 +1273,8 @@ export default function RecognitionGame() {
 
         <h1>Let's Remember</h1>
 
+        <div className="recognition-state-badge">📍 {selectedState}</div>
+
         <div className="recognition-progress">
           Question {currentQuestion + 1} of {questions.length}
         </div>
@@ -871,7 +1285,7 @@ export default function RecognitionGame() {
 
         <div className="recognition-options">
           {current.options.map((option) => {
-            const image = getImage(option.image);
+            const image = getImage(option.image, selectedState);
 
             const isSelected = selectedOption === option.value;
 

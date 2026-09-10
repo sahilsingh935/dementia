@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import "./RecallSequenceGame.css";
 import { saveRecallSequenceResult } from "../../services/recallSequenceDb";
 
-const selectedState = "Assam";
+const selectedState =
+  localStorage.getItem("manasState") ||
+  sessionStorage.getItem("manasState") ||
+  "Assam";
 
 const imageModules = import.meta.glob(
   "../../assets/cultural/memory/**/*.{png,jpg,jpeg,webp}",

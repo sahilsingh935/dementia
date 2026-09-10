@@ -8,14 +8,42 @@ import { saveRoutineResult } from "../../services/routineDb";
 // DYNAMIC IMAGE LOADING
 // =================================
 
-const imageModules = import.meta.glob("../../assets/states/assam/q*/img*.jpg", {
+const imageModules = import.meta.glob("../../assets/states/*/q*/img*.jpg", {
   eager: true,
   query: "?url",
   import: "default",
 });
 
-function getImage(questionNumber, imageNumber) {
-  const target = `/q${questionNumber}/img${imageNumber}.jpg`;
+function getSelectedState() {
+  return (
+    localStorage.getItem("manasState") ||
+    sessionStorage.getItem("manasState") ||
+    "Assam"
+  );
+}
+
+function normalizeStateFolder(state = "Assam") {
+  const value = String(state).trim().toLowerCase();
+
+  const aliases = {
+    "arunachal-pradesh": "arunachal",
+    "arunachal pradesh": "arunachal",
+    arunachal: "arunachal",
+    assam: "assam",
+    manipur: "manipur",
+    meghalaya: "meghalaya",
+    mizoram: "mizoram",
+    nagaland: "nagaland",
+    sikkim: "sikkim",
+    tripura: "tripura",
+  };
+
+  return aliases[value] || "assam";
+}
+
+function getImage(questionNumber, imageNumber, state = "Assam") {
+  const folder = normalizeStateFolder(state);
+  const target = `/${folder}/q${questionNumber}/img${imageNumber}.jpg`;
 
   const foundKey = Object.keys(imageModules).find((key) =>
     key.replace(/\\/g, "/").toLowerCase().endsWith(target.toLowerCase()),
@@ -25,7 +53,7 @@ function getImage(questionNumber, imageNumber) {
     return imageModules[foundKey];
   }
 
-  return `/assets/states/assam/q${questionNumber}/img${imageNumber}.jpg`;
+  return `/assets/states/${folder}/q${questionNumber}/img${imageNumber}.jpg`;
 }
 
 // =================================
@@ -53,24 +81,28 @@ const TOTAL_QUESTIONS = 10;
 // QUESTION BANK
 // =================================
 
-const questionBank = {};
+function createQuestionBank(state = "Assam") {
+  const bank = {};
 
-for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-  const questionNumber = i + 1;
+  for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+    const questionNumber = i + 1;
 
-  questionBank[`q${questionNumber}`] = {
-    id: questionNumber,
+    bank[`q${questionNumber}`] = {
+      id: questionNumber,
 
-    images: [
-      getImage(questionNumber, 1),
-      getImage(questionNumber, 2),
-      getImage(questionNumber, 3),
-      getImage(questionNumber, 4),
-    ],
+      images: [
+        getImage(questionNumber, 1, state),
+        getImage(questionNumber, 2, state),
+        getImage(questionNumber, 3, state),
+        getImage(questionNumber, 4, state),
+      ],
 
-    answer: answers[i],
-    difficulty: difficulties[i],
-  };
+      answer: answers[i],
+      difficulty: difficulties[i],
+    };
+  }
+
+  return bank;
 }
 
 // =================================
@@ -87,6 +119,9 @@ function shuffle(array) {
 
 export default function RoutineGame() {
   const navigate = useNavigate();
+
+  const selectedState = getSelectedState();
+  const questionBank = createQuestionBank(selectedState);
 
   // =================================
   // PREVIOUS ML DECISION
@@ -173,7 +208,9 @@ export default function RoutineGame() {
 
   const timeoutRef = useRef(null);
 
-  const question = questionBank[currentQuestionKey];
+  const question =
+    questionBank[currentQuestionKey] ||
+    questionBank.q1;
 
   // =================================
   // MARK INITIAL QUESTION AS USED
@@ -331,6 +368,7 @@ export default function RoutineGame() {
         currentDifficulty,
         difficultyChange,
         previousScore,
+        state: selectedState,
         playedAt: new Date().toISOString(),
       };
 
@@ -550,6 +588,10 @@ export default function RoutineGame() {
 
             <div className="instruction-badge">
               Spot the picture that is different.
+            </div>
+
+            <div className="routine-state-badge">
+              📍 {selectedState.replace(/-/g, " ")}
             </div>
           </div>
 

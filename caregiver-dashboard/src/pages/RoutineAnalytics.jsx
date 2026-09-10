@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import "./GameAnalytics.css";
+
 import { getPatients, getAnalytics } from "../services/api";
 
 export default function RoutineAnalytics() {

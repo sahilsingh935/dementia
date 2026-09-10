@@ -1,21 +1,178 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap");
+
+/* =====================================================
+   ROOT
+===================================================== */
+
+:root {
+  --puzzle-green-dark: #214f3b;
+  --puzzle-green: #506844;
+  --puzzle-green-soft: #dceee7;
+  --puzzle-green-pale: #edf5f1;
+
+  --puzzle-text: #2c3b32;
+  --puzzle-muted: #71817a;
+
+  --puzzle-cream: rgba(255, 250, 237, 0.76);
+  --puzzle-white: #fffdf8;
+}
+
+/* =====================================================
+   MAIN PAGE
+===================================================== */
+
+.puzzle-page {
+  width: 100vw;
+  min-height: 100vh;
+
+  box-sizing: border-box;
+
+  padding: 14px 20px;
+
+  background:
+    linear-gradient(rgba(244, 248, 240, 0.04), rgba(244, 248, 240, 0.04)),
+    url("/bg.png") center / cover no-repeat;
+
+  font-family: "Quicksand", sans-serif;
+
+  color: var(--puzzle-text);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  overflow: hidden;
+
+  position: relative;
+}
+
 /* =====================================================
    MAIN CONTAINER
 ===================================================== */
 
 .puzzle-container {
   width: 100%;
-  min-height: 100dvh;
+  max-width: 900px;
+
+  min-height: calc(100vh - 28px);
 
   box-sizing: border-box;
 
-  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  background: #f4f7f6;
+  position: relative;
+}
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+.puzzle-topbar {
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 8px;
+}
+
+/* =====================================================
+   BACK BUTTON
+===================================================== */
+
+.puzzle-back-button {
+  border: none;
+
+  padding: 8px 21px;
+
+  border-radius: 18px;
+
+  background: var(--puzzle-green);
+
+  color: #ffffff;
+
+  font-family: "Quicksand", sans-serif;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 10px rgba(55, 76, 55, 0.15);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.puzzle-back-button:hover {
+  background: #455b3b;
+
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   LEVEL
+===================================================== */
+
+.puzzle-level {
+  padding: 7px 16px;
+
+  border-radius: 18px;
+
+  background: rgba(255, 255, 255, 0.62);
+
+  color: var(--puzzle-green-dark);
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* =====================================================
+   GAME CARD
+===================================================== */
+
+.puzzle-game-card {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 17px 22px 22px;
+
+  background: var(--puzzle-cream);
+
+  border-radius: 25px;
+
+  border: 1px solid rgba(255, 255, 255, 0.52);
+
+  box-shadow: 0 12px 34px rgba(67, 87, 67, 0.1);
+
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
 
   display: flex;
   flex-direction: column;
+  align-items: center;
 
-  overflow: hidden;
+  animation: cardIn 0.35s ease;
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =====================================================
@@ -24,194 +181,140 @@
 
 .puzzle-header {
   width: 100%;
-  max-width: 900px;
-
-  margin: 0 auto 12px;
 
   text-align: center;
-}
 
-.game-label {
-  margin-bottom: 2px;
-
-  font-size: 9px;
-  font-weight: 800;
-
-  letter-spacing: 3px;
-
-  color: #4d7769;
-}
-
-.puzzle-header h1 {
-  margin: 0;
-
-  font-size: 28px;
-  line-height: 1.1;
-
-  color: #244b40;
-}
-
-.puzzle-header p {
-  margin: 4px 0 0;
-
-  font-size: 12px;
-
-  color: #70817b;
-}
-
-/* =====================================================
-   COMMON CARD
-===================================================== */
-
-.observation-card,
-.puzzle-card {
-  width: 100%;
-  max-width: 900px;
-
-  margin: 0 auto;
-
-  padding: 17px;
-
-  box-sizing: border-box;
-
-  background: #fffdf8;
-
-  border-radius: 20px;
-
-  box-shadow: 0 7px 25px rgba(40, 75, 64, 0.08);
-}
-
-/* =====================================================
-   SECTION HEADING
-===================================================== */
-
-.section-heading {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-bottom: 14px;
+}
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+.puzzle-title-wrapper {
+  display: inline-flex;
 
   align-items: center;
+  justify-content: center;
 
   gap: 10px;
 
-  text-align: left;
+  margin-bottom: 8px;
 }
 
-.section-number {
-  width: 29px;
-  height: 29px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: #dceee7;
-
-  color: #2d8066;
-
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.section-heading h2 {
+.puzzle-header h2 {
   margin: 0;
 
-  font-size: 18px;
+  color: var(--puzzle-green-dark);
 
-  color: #31584d;
+  font-family: "Quicksand", sans-serif !important;
+
+  font-size: 25px;
+
+  font-weight: 700;
+
+  line-height: 1.15;
+
+  letter-spacing: 0.01em;
 }
 
-.section-heading p {
-  margin: 3px 0 0;
+.leaf-icon {
+  font-size: 22px;
 
-  font-size: 11px;
+  line-height: 1;
 
-  color: #7b8b86;
+  opacity: 0.9;
 }
 
 /* =====================================================
-   OBSERVATION
+   TITLE BADGE
 ===================================================== */
 
-.observation-card {
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-}
-
-.observation-card .section-heading {
-  width: 100%;
-}
-
-.reference-image-box {
-  width: min(100%, 430px);
-
-  margin: 13px auto 7px;
-
-  display: flex;
+.title-badge {
+  display: inline-flex;
 
   align-items: center;
   justify-content: center;
+
+  padding: 7px 20px;
+
+  border-radius: 18px;
+
+  background: var(--puzzle-green);
+
+  box-shadow: 0 4px 10px rgba(80, 104, 68, 0.18);
+}
+
+.subtext {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-family: "Quicksand", sans-serif;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+/* =====================================================
+   OBSERVATION IMAGE
+===================================================== */
+
+.reference-image-box {
+  width: min(100%, 420px);
+
+  aspect-ratio: 1 / 1;
+
+  margin: 5px auto 8px;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow: 0 7px 22px rgba(35, 65, 55, 0.12);
 }
 
 .reference-image {
+  width: 100%;
+  height: 100%;
+
   display: block;
 
-  width: 100%;
-
-  max-height: 52dvh;
-
-  object-fit: contain;
-
-  border-radius: 14px;
-
-  box-shadow: 0 6px 20px rgba(35, 65, 55, 0.12);
+  object-fit: cover;
 }
 
 .observation-message {
   margin: 4px 0 0;
 
-  font-size: 11px;
+  color: var(--puzzle-muted);
 
-  color: #788984;
+  font-size: 12px;
+
+  font-weight: 600;
 
   text-align: center;
 }
 
 /* =====================================================
-   PUZZLE
-===================================================== */
-
-.puzzle-card {
-  padding-bottom: 16px;
-}
-
-.puzzle-card-header {
-  margin-bottom: 4px;
-}
-
-/* =====================================================
-   PUZZLE GAME AREA
-   DESKTOP / TABLET
+   GAME AREA
 ===================================================== */
 
 .puzzle-game-area {
   width: 100%;
 
-  margin-top: 13px;
-
   display: flex;
 
   flex-direction: row;
 
-  justify-content: center;
-
   align-items: center;
+  justify-content: center;
 
   gap: 20px;
 
@@ -231,11 +334,13 @@
 
   box-sizing: border-box;
 
-  background: #edf5f1;
+  background: rgba(237, 245, 241, 0.92);
 
-  border-radius: 13px;
+  border-radius: 14px;
 
   text-align: center;
+
+  border: 1px solid rgba(108, 159, 140, 0.12);
 }
 
 .hint-button {
@@ -245,23 +350,34 @@
 
   border: none;
 
-  border-radius: 9px;
+  border-radius: 10px;
 
-  background: #dceee7;
+  background: var(--puzzle-green-soft);
 
   color: #2d8066;
 
+  font-family: "Quicksand", sans-serif;
+
   font-size: 12px;
+
   font-weight: 700;
 
   cursor: pointer;
 
-  transition: background 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .hint-button:hover {
   background: #cfe6dd;
+
+  transform: translateY(-1px);
 }
+
+/* =====================================================
+   HINT CARD
+===================================================== */
 
 .hint-card {
   width: 100%;
@@ -284,17 +400,25 @@
 
   object-fit: cover;
 
-  border-radius: 8px;
+  border-radius: 9px;
 }
 
 .hint-close {
+  padding: 4px 12px;
+
   border: none;
 
-  background: transparent;
+  border-radius: 10px;
 
-  color: #5d8175;
+  background: #e5e8e5;
+
+  color: #567065;
+
+  font-family: "Quicksand", sans-serif;
 
   font-size: 10px;
+
+  font-weight: 700;
 
   cursor: pointer;
 }
@@ -304,7 +428,7 @@
 ===================================================== */
 
 .puzzle-board {
-  --board-size: min(65vw, 450px);
+  --board-size: min(58vw, 460px);
 
   width: var(--board-size);
 
@@ -318,19 +442,25 @@
 
   grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
 
+  gap: 3px;
+
+  padding: 5px;
+
+  box-sizing: border-box;
+
   background: #edf4f1;
 
   border: 1px solid #d0dfd9;
 
-  border-radius: 8px;
+  border-radius: 13px;
 
   overflow: hidden;
 
-  box-shadow: 0 7px 22px rgba(45, 80, 68, 0.1);
+  box-shadow: 0 8px 24px rgba(45, 80, 68, 0.11);
 }
 
 /* =====================================================
-   PIECE
+   PUZZLE PIECE
 ===================================================== */
 
 .puzzle-piece {
@@ -343,13 +473,26 @@
 
   box-sizing: border-box;
 
-  border: 1px solid #d5e2dd;
+  border: 2px solid rgba(255, 255, 255, 0.55);
 
   background: #edf4f1;
+
+  border-radius: 7px;
 
   cursor: grab;
 
   touch-action: none;
+
+  user-select: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.puzzle-piece:hover:not(.locked-piece) {
+  transform: scale(0.985);
 }
 
 .puzzle-piece:active {
@@ -358,6 +501,10 @@
 
 /* =====================================================
    IMAGE INSIDE PIECE
+
+   IMPORTANT:
+   Each tile displays the correct portion
+   of the complete image.
 ===================================================== */
 
 .puzzle-piece img {
@@ -367,19 +514,18 @@
   left: 0;
 
   width: calc(var(--cols) * 100%);
-
   height: calc(var(--rows) * 100%);
 
   max-width: none;
 
   /*
-    Image is shifted according to
-    the piece's original position.
+    Each movement of one column/row equals
+    exactly one puzzle-piece size.
   */
 
   transform: translate(
-    calc(var(--correct-col) * -100% / var(--cols)),
-    calc(var(--correct-row) * -100% / var(--rows))
+    calc(var(--correct-col) * -100%),
+    calc(var(--correct-row) * -100%)
   );
 
   pointer-events: none;
@@ -398,7 +544,7 @@
 
   border: 3px solid #6c9f8c;
 
-  box-shadow: 0 0 0 2px rgba(108, 159, 140, 0.18);
+  box-shadow: 0 0 0 3px rgba(108, 159, 140, 0.18);
 }
 
 /* =====================================================
@@ -411,10 +557,12 @@
   cursor: default;
 
   border: 3px solid #2d8066;
+
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 /* =====================================================
-   AUTOMATIC TRANSITION
+   LEVEL TRANSITION
 ===================================================== */
 
 .level-transition {
@@ -422,9 +570,7 @@
 
   inset: 0;
 
-  z-index: 50;
-
-  background: rgba(244, 247, 246, 0.95);
+  z-index: 100;
 
   display: flex;
 
@@ -438,28 +584,35 @@
 
   box-sizing: border-box;
 
+  background: rgba(244, 247, 246, 0.94);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
   text-align: center;
 }
 
 .level-transition p {
-  max-width: 280px;
+  max-width: 320px;
 
-  margin: 13px 0 0;
+  margin: 14px 0 0;
 
-  font-size: 14px;
+  color: var(--puzzle-green-dark);
+
+  font-size: 15px;
+
+  font-weight: 700;
 
   line-height: 1.5;
-
-  color: #31584d;
 }
 
 .transition-spinner {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
 
   border-radius: 50%;
 
-  border: 3px solid #d7e8e1;
+  border: 4px solid #d7e8e1;
 
   border-top-color: #4d9078;
 
@@ -473,27 +626,187 @@
 }
 
 /* =====================================================
+   EXIT OVERLAY
+===================================================== */
+
+.puzzle-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  background: rgba(31, 39, 30, 0.35);
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  animation: overlayIn 0.2s ease;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =====================================================
+   EXIT POPUP
+===================================================== */
+
+.puzzle-exit-popup {
+  width: min(350px, 90vw);
+
+  padding: 27px 24px;
+
+  box-sizing: border-box;
+
+  text-align: center;
+
+  background: rgba(255, 255, 255, 0.97);
+
+  border-radius: 27px;
+
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
+
+  animation: popupIn 0.25s ease-out;
+}
+
+@keyframes popupIn {
+  from {
+    opacity: 0;
+
+    transform: scale(0.94) translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: scale(1) translateY(0);
+  }
+}
+
+.exit-icon {
+  font-size: 25px;
+
+  margin-bottom: 7px;
+}
+
+.puzzle-exit-popup h2 {
+  margin: 0 0 7px;
+
+  color: #1f271e;
+
+  font-family: "Quicksand", sans-serif;
+
+  font-size: 23px;
+
+  font-weight: 700;
+}
+
+.puzzle-exit-popup p {
+  margin: 0 0 21px;
+
+  color: #66736b;
+
+  font-family: "Quicksand", sans-serif;
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+/* =====================================================
+   POPUP BUTTONS
+===================================================== */
+
+.puzzle-popup-buttons {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 11px;
+}
+
+.puzzle-popup-buttons button {
+  min-width: 105px;
+
+  padding: 9px 19px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  font-family: "Quicksand", sans-serif;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.puzzle-popup-buttons button:hover {
+  transform: translateY(-1px);
+}
+
+.puzzle-cancel-btn {
+  background: #e8e9e6;
+
+  color: #2c362b;
+}
+
+.puzzle-cancel-btn:hover {
+  background: #dcdedb;
+}
+
+.puzzle-exit-btn {
+  background: var(--puzzle-green);
+
+  color: #ffffff;
+}
+
+.puzzle-exit-btn:hover {
+  background: #3f5637;
+}
+
+/* =====================================================
    TABLET
 ===================================================== */
 
 @media (max-width: 850px) {
+  .puzzle-page {
+    padding: 12px 14px;
+  }
+
   .puzzle-container {
-    padding: 13px 14px;
+    min-height: calc(100vh - 24px);
   }
 
-  .puzzle-header {
-    margin-bottom: 9px;
+  .puzzle-game-card {
+    padding: 15px;
+    border-radius: 21px;
   }
 
-  .puzzle-header h1 {
-    font-size: 25px;
-  }
-
-  .observation-card,
-  .puzzle-card {
-    padding: 14px;
-
-    border-radius: 18px;
+  .puzzle-header h2 {
+    font-size: 22px;
   }
 
   .puzzle-game-area {
@@ -501,125 +814,102 @@
   }
 
   .hint-side-box {
-    width: 90px;
+    width: 88px;
   }
 
   .puzzle-board {
-    --board-size: min(67vw, 400px);
+    --board-size: min(62vw, 400px);
   }
 }
 
 /* =====================================================
    MOBILE
-   HINT ABOVE PUZZLE
 ===================================================== */
 
 @media (max-width: 600px) {
-  .puzzle-container {
+  .puzzle-page {
     min-height: 100dvh;
 
-    padding: 7px 8px;
-
-    overflow: hidden;
+    padding: 8px;
   }
 
-  /* -----------------------------------------------
-     HEADER
-  ----------------------------------------------- */
+  .puzzle-container {
+    min-height: 100dvh;
+  }
 
-  .puzzle-header {
+  .puzzle-topbar {
     margin-bottom: 5px;
   }
 
-  .game-label {
-    font-size: 7px;
+  .puzzle-back-button {
+    padding: 7px 16px;
 
-    letter-spacing: 2.5px;
+    font-size: 12px;
   }
 
-  .puzzle-header h1 {
-    font-size: 20px;
+  .puzzle-level {
+    padding: 6px 12px;
+
+    font-size: 11px;
   }
 
-  .puzzle-header p {
-    font-size: 9px;
+  .puzzle-game-card {
+    padding: 10px;
 
-    margin-top: 2px;
+    border-radius: 17px;
   }
 
-  /* -----------------------------------------------
-     CARD
-  ----------------------------------------------- */
+  .puzzle-header {
+    margin-bottom: 8px;
+  }
 
-  .observation-card,
-  .puzzle-card {
-    padding: 8px;
+  .puzzle-title-wrapper {
+    gap: 6px;
+
+    margin-bottom: 6px;
+  }
+
+  .puzzle-header h2 {
+    font-size: 17px;
+  }
+
+  .leaf-icon {
+    font-size: 16px;
+  }
+
+  .title-badge {
+    padding: 6px 13px;
 
     border-radius: 14px;
   }
 
-  /* -----------------------------------------------
-     SECTION
-  ----------------------------------------------- */
-
-  .section-heading {
-    gap: 7px;
+  .subtext {
+    font-size: 9px;
   }
-
-  .section-number {
-    width: 23px;
-    height: 23px;
-
-    font-size: 10px;
-  }
-
-  .section-heading h2 {
-    font-size: 13px;
-  }
-
-  .section-heading p {
-    font-size: 8px;
-  }
-
-  /* -----------------------------------------------
-     OBSERVATION
-  ----------------------------------------------- */
 
   .reference-image-box {
     width: min(100%, 320px);
 
-    margin: 7px auto 4px;
-  }
+    margin-top: 4px;
 
-  .reference-image {
-    max-height: 54dvh;
-
-    border-radius: 9px;
+    border-radius: 12px;
   }
 
   .observation-message {
-    font-size: 8px;
+    font-size: 9px;
   }
 
-  /* =================================================
-     MOBILE GAME AREA
-  ================================================= */
+  /* GAME AREA */
 
   .puzzle-game-area {
     flex-direction: column;
 
-    align-items: center;
+    gap: 7px;
 
-    justify-content: flex-start;
-
-    gap: 6px;
-
-    margin-top: 7px;
+    margin-top: 2px;
   }
 
-  /* =================================================
-     HINT ABOVE PUZZLE
-  ================================================= */
+  /* HINT ABOVE BOARD */
 
   .hint-side-box {
     order: 1;
@@ -649,13 +939,11 @@
     flex-direction: row;
 
     gap: 5px;
-
-    align-items: center;
   }
 
   .hint-image {
-    width: 42px;
-    height: 42px;
+    width: 43px;
+    height: 43px;
 
     border-radius: 6px;
   }
@@ -664,24 +952,26 @@
     font-size: 8px;
   }
 
-  /* =================================================
-     MOBILE PUZZLE BOARD
-  ================================================= */
+  /* BOARD */
 
   .puzzle-board {
     order: 2;
 
-    width: min(calc(100vw - 18px), calc(100dvh - 175px));
+    width: min(calc(100vw - 28px), calc(100dvh - 180px));
 
     max-width: 100%;
 
-    flex-shrink: 0;
+    padding: 3px;
 
-    border-radius: 6px;
+    gap: 2px;
+
+    border-radius: 8px;
   }
 
   .puzzle-piece {
     border-width: 1px;
+
+    border-radius: 4px;
   }
 
   .selected-piece {
@@ -698,39 +988,24 @@
 ===================================================== */
 
 @media (max-width: 380px) {
-  .puzzle-container {
-    padding: 5px 6px;
+  .puzzle-page {
+    padding: 5px;
   }
 
-  .puzzle-header h1 {
-    font-size: 18px;
+  .puzzle-game-card {
+    padding: 8px;
   }
 
-  .puzzle-header p {
-    display: none;
+  .puzzle-header h2 {
+    font-size: 15px;
   }
 
-  .observation-card,
-  .puzzle-card {
-    padding: 7px;
+  .subtext {
+    font-size: 8px;
   }
 
-  .section-heading h2 {
-    font-size: 12px;
-  }
-
-  .section-heading p {
-    display: none;
-  }
-
-  .reference-image-box {
-    margin-top: 5px;
-  }
-
-  .puzzle-game-area {
-    margin-top: 5px;
-
-    gap: 5px;
+  .puzzle-board {
+    width: min(calc(100vw - 18px), calc(100dvh - 145px));
   }
 
   .hint-side-box {
@@ -743,9 +1018,5 @@
     min-width: 54px;
 
     padding: 4px 8px;
-  }
-
-  .puzzle-board {
-    width: min(calc(100vw - 14px), calc(100dvh - 145px));
   }
 }

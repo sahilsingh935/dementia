@@ -479,7 +479,7 @@ export default function PatientDetail() {
 
         <header className="patient-header">
           <div className="brand">
-            <img src="/logo.jpg" alt="MANAS" />
+            <img src="/manas-logo.png" alt="MANAS" />
 
             <div>
               <strong>MANAS</strong>

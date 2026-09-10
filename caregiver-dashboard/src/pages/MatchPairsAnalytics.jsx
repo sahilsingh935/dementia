@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import "./PatientDetail.css";
+import "./GameAnalytics.css";
 
 const API_URL = "http://localhost:5000/api";
 

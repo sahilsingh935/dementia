@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage, LANGUAGES } from "../i18n/LanguageContext";
+import VoiceButton from "../components/VoiceButton";
 import "./PatientHome.css";
 
 // =========================
@@ -12,14 +14,17 @@ function getPatientAuth() {
       localStorage.getItem("manasToken") ||
       sessionStorage.getItem("manasToken") ||
       null,
+
     role:
       localStorage.getItem("manasRole") ||
       sessionStorage.getItem("manasRole") ||
       null,
+
     userId:
       localStorage.getItem("manasUserId") ||
       sessionStorage.getItem("manasUserId") ||
       null,
+
     name:
       localStorage.getItem("manasUser") ||
       sessionStorage.getItem("manasUser") ||
@@ -27,7 +32,58 @@ function getPatientAuth() {
   };
 }
 
-const games = [
+// =========================
+// STATES
+// =========================
+
+const STATES = [
+  {
+    code: "Assam",
+    name: "Assam",
+    nativeName: "অসম",
+  },
+  {
+    code: "Arunachal-Pradesh",
+    name: "Arunachal Pradesh",
+    nativeName: "अरुणाचल प्रदेश",
+  },
+  {
+    code: "Manipur",
+    name: "Manipur",
+    nativeName: "মণিপুর",
+  },
+  {
+    code: "Meghalaya",
+    name: "Meghalaya",
+    nativeName: "Meghalaya",
+  },
+  {
+    code: "Mizoram",
+    name: "Mizoram",
+    nativeName: "Mizoram",
+  },
+  {
+    code: "Nagaland",
+    name: "Nagaland",
+    nativeName: "Nagaland",
+  },
+  {
+    code: "Sikkim",
+    name: "Sikkim",
+    nativeName: "Sikkim",
+  },
+  {
+    code: "Tripura",
+    name: "Tripura",
+    nativeName: "ত্রিপুরা",
+  },
+];
+
+// =========================
+// GAMES
+// =========================
+
+const gameConfig = [
   {
     id: "memory",
     name: "Match The Pairs",
@@ -70,6 +126,10 @@ const games = [
   },
 ];
 
+// =========================
+// THOUGHTS
+// =========================
+
 const thoughts = [
   "Small steps. Brighter days.",
   "A healthier mind leads to a happier you.",
@@ -79,6 +139,10 @@ const thoughts = [
   "One step at a time is still progress.",
   "Believe in yourself and keep going.",
 ];
+
+// =========================
+// DEFAULT REMINDERS
+// =========================
 
 const defaultReminders = [
   {
@@ -101,12 +165,17 @@ const defaultReminders = [
   },
 ];
 
+// =========================
+// TIME
+// =========================
+
 const getTimeData = () => {
   const hour = new Date().getHours();
 
   if (hour >= 5 && hour < 12) {
     return {
       greeting: "Good Morning!",
+      greetingKey: "goodMorning",
       background: "/background-bg.png",
     };
   }
@@ -114,6 +183,7 @@ const getTimeData = () => {
   if (hour >= 12 && hour < 17) {
     return {
       greeting: "Good Afternoon!",
+      greetingKey: "goodAfternoon",
       background: "/background-bg.png",
     };
   }
@@ -121,15 +191,21 @@ const getTimeData = () => {
   if (hour >= 17 && hour < 21) {
     return {
       greeting: "Good Evening!",
+      greetingKey: "goodEvening",
       background: "/background1-bg.png",
     };
   }
 
   return {
     greeting: "Good Night!",
+    greetingKey: "goodNight",
     background: "/background1-bg.png",
   };
 };
+
+// =========================
+// DAILY THOUGHT
+// =========================
 
 function getDailyThought() {
   const today = new Date();
@@ -141,6 +217,10 @@ function getDailyThought() {
   return thoughts[Math.abs(dateNumber) % thoughts.length];
 }
 
+// =========================
+// PATIENT HOME
+// =========================
+
 function PatientHome() {
   const navigate = useNavigate();
 
@@ -148,15 +228,40 @@ function PatientHome() {
 
   const [selectedGame, setSelectedGame] = useState("");
 
-  const [recommendedGame, setRecommendedGame] = useState(games[0]);
-
   const [reminders, setReminders] = useState([]);
 
   const [patientName, setPatientName] = useState("Guest User");
 
-  const [language, setLanguage] = useState("English");
+  const { language, setLanguage, t } = useLanguage();
+
+  // Translated games are rebuilt whenever the selected language changes.
+  const games = gameConfig.map((game) => {
+    const translationKey =
+      game.id === "attention"
+        ? "puzzle"
+        : game.id === "recall"
+          ? "recall"
+          : game.id;
+
+    return {
+      ...game,
+      name: t(`home.${translationKey}`),
+      description: t(`${translationKey}.instruction`),
+    };
+  });
+
+  // NEW — selected state
+  const [selectedState, setSelectedState] = useState("Assam");
+
+  const [recommendedGame, setRecommendedGame] = useState(null);
+
+  const activeRecommendedGame =
+    recommendedGame || games[0];
 
   const [showLanguage, setShowLanguage] = useState(false);
+
+  // NEW — state dropdown
+  const [showState, setShowState] = useState(false);
 
   const [showProfile, setShowProfile] = useState(false);
 
@@ -170,7 +275,11 @@ function PatientHome() {
 
   const [dailyThought, setDailyThought] = useState(getDailyThought());
 
-  /* ================= PATIENT DATA ================= */
+
+
+  // =========================
+  // PATIENT DATA
+  // =========================
 
   useEffect(() => {
     const auth = getPatientAuth();
@@ -193,14 +302,22 @@ function PatientHome() {
       }
     }
 
-    const savedLanguage =
-      localStorage.getItem("manasLanguage") ||
-      sessionStorage.getItem("manasLanguage");
+    // STATE
+    const savedState =
+      localStorage.getItem("manasState") ||
+      sessionStorage.getItem("manasState");
 
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
+    if (savedState) {
+      const stateExists = STATES.some((state) => state.code === savedState);
+
+      if (stateExists) {
+        setSelectedState(savedState);
+      } else {
+        setSelectedState("Assam");
+      }
     }
 
+    // REMINDERS
     const savedReminders =
       localStorage.getItem("manasReminders") ||
       sessionStorage.getItem("manasReminders");
@@ -208,6 +325,7 @@ function PatientHome() {
     if (savedReminders) {
       try {
         const parsed = JSON.parse(savedReminders);
+
         setReminders(Array.isArray(parsed) ? parsed : defaultReminders);
       } catch {
         setReminders(defaultReminders);
@@ -217,7 +335,9 @@ function PatientHome() {
     }
   }, [navigate]);
 
-  /* ================= SAVE REMINDERS ================= */
+  // =========================
+  // SAVE REMINDERS
+  // =========================
 
   useEffect(() => {
     const auth = getPatientAuth();
@@ -231,7 +351,9 @@ function PatientHome() {
     storage.setItem("manasReminders", JSON.stringify(reminders));
   }, [reminders]);
 
-  /* ================= TIME UPDATE ================= */
+  // =========================
+  // TIME UPDATE
+  // =========================
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -242,7 +364,9 @@ function PatientHome() {
     return () => clearInterval(timer);
   }, []);
 
-  /* ================= ML RECOMMENDATION ================= */
+  // =========================
+  // ML RECOMMENDATION
+  // =========================
 
   useEffect(() => {
     loadRecommendation();
@@ -297,7 +421,9 @@ function PatientHome() {
     }
   }
 
-  /* ================= LOCAL FALLBACK ================= */
+  // =========================
+  // LOCAL FALLBACK
+  // =========================
 
   function useLocalWeakestGame() {
     const storedResults = [];
@@ -379,7 +505,9 @@ function PatientHome() {
     setRecommendedGame(weakestGame);
   }
 
-  /* ================= GAME ================= */
+  // =========================
+  // GAME
+  // =========================
 
   function handleGameClick(game) {
     setSelectedGame(game);
@@ -387,10 +515,12 @@ function PatientHome() {
   }
 
   function handlePlayNow() {
-    navigate(recommendedGame.path);
+    navigate(activeRecommendedGame.path);
   }
 
-  /* ================= REMINDERS ================= */
+  // =========================
+  // REMINDERS
+  // =========================
 
   function toggleReminder(id) {
     setReminders((prev) =>
@@ -426,21 +556,28 @@ function PatientHome() {
     setReminders((prev) => prev.filter((reminder) => reminder.id !== id));
   }
 
-  /* ================= LANGUAGE ================= */
+  // =========================
+  // STATE
+  // =========================
 
-  function changeLanguage(value) {
-    setLanguage(value);
+  function changeState(value) {
+    setSelectedState(value);
 
     const storage = localStorage.getItem("manasToken")
       ? localStorage
       : sessionStorage;
 
-    storage.setItem("manasLanguage", value);
+    storage.setItem("manasState", value);
 
-    setShowLanguage(false);
+    setShowState(false);
   }
 
-  /* ================= LOGOUT ================= */
+  const selectedStateName =
+    STATES.find((state) => state.code === selectedState)?.name || "Assam";
+
+  // =========================
+  // LOGOUT
+  // =========================
 
   function handleLogout() {
     [
@@ -450,6 +587,7 @@ function PatientHome() {
       "manasUserId",
       "manasAge",
       "manasMobile",
+      "manasState",
     ].forEach((key) => {
       localStorage.removeItem(key);
       sessionStorage.removeItem(key);
@@ -474,6 +612,8 @@ function PatientHome() {
           </button>
 
           <nav className="top-actions">
+            {/* HOME */}
+
             <button className="header-nav" onClick={() => navigate("/patient")}>
               <span>⌂</span>
               HOME
@@ -481,28 +621,132 @@ function PatientHome() {
 
             {/* LANGUAGE */}
 
-            <div className="menu-wrap">
+            <div className="menu-wrap language-menu-wrap">
               <button
-                className="header-nav"
-                onClick={() => setShowLanguage(!showLanguage)}
+                className={`header-nav language-nav ${
+                  showLanguage ? "language-nav-active" : ""
+                }`}
+                onClick={() => {
+                  setShowLanguage((prev) => !prev);
+                  setShowState(false);
+                }}
+                aria-label={t("common.language")}
               >
-                <span>◎</span>
-                LANGUAGE
+                <span>🌐</span>
+                <span>
+                  {LANGUAGES.find(
+                    (item) => item.code === language
+                  )?.nativeName || "English"}
+                </span>
+                <span className={`language-arrow ${showLanguage ? "open" : ""}`}>
+                  ▾
+                </span>
               </button>
 
               {showLanguage && (
                 <div className="floating-menu language-menu">
-                  {["English", "অসমীয়া", "বাংলা", "মণিপুরি", "नेपाली"].map(
-                    (item) => (
+                  <div className="language-menu-header">
+                    <span className="language-menu-icon">🌐</span>
+                    <div>
+                      <strong>{t("common.language")}</strong>
+                      <small>Choose your language</small>
+                    </div>
+                  </div>
+
+                  <div className="language-options">
+                    {LANGUAGES.map((item) => (
                       <button
-                        key={item}
-                        className={language === item ? "active-language" : ""}
-                        onClick={() => changeLanguage(item)}
+                        key={item.code}
+                        className={
+                          language === item.code
+                            ? "active-language"
+                            : ""
+                        }
+                        onClick={() => {
+                          setLanguage(item.code);
+                          setShowLanguage(false);
+                        }}
                       >
-                        {item}
+                        <span className="language-option-icon">
+                          {language === item.code ? "✓" : "🌐"}
+                        </span>
+
+                        <span className="language-option-content">
+                          <span className="language-native">
+                            {item.nativeName}
+                          </span>
+                          <small>{item.name}</small>
+                        </span>
+
+                        {language === item.code && (
+                          <span className="selected-dot">●</span>
+                        )}
                       </button>
-                    ),
-                  )}
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* STATE */}
+
+            <div className="menu-wrap state-menu-wrap">
+              <button
+                className={`header-nav state-nav ${
+                  showState ? "state-nav-active" : ""
+                }`}
+                onClick={() => {
+                  setShowState((prev) => !prev);
+                  setShowLanguage(false);
+                }}
+              >
+                <span className="state-nav-icon">⌖</span>
+
+                <span className="state-nav-text">{selectedStateName}</span>
+
+                <span className={`state-arrow ${showState ? "open" : ""}`}>
+                  ▾
+                </span>
+              </button>
+
+              {showState && (
+                <div className="floating-menu state-menu">
+                  <div className="state-menu-header">
+                    <span className="state-menu-icon">⌖</span>
+
+                    <div>
+                      <strong>{t("home.selectState")}</strong>
+                      <small>{t("home.chooseRegion")}</small>
+                    </div>
+                  </div>
+
+                  <div className="state-options">
+                    {STATES.map((state) => (
+                      <button
+                        key={state.code}
+                        className={
+                          selectedState === state.code ? "active-state" : ""
+                        }
+                        onClick={() => changeState(state.code)}
+                      >
+                        <span className="state-option-icon">
+                          {selectedState === state.code ? "✓" : "⌖"}
+                        </span>
+
+                        <span className="state-option-content">
+                          <span className="state-native">
+                            {state.nativeName}
+                          </span>
+
+                          <small>{state.name}</small>
+                        </span>
+
+                        {selectedState === state.code && (
+                          <span className="selected-dot">●</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -528,9 +772,9 @@ function PatientHome() {
 
           <section className="game-panel card">
             <div className="section-heading">
-              <h2>CHOOSE GAME</h2>
+              <h2>{t("home.games")}</h2>
 
-              <span className="game-count">5 games</span>
+              <span className="game-count">5 {t("home.gameWord")}</span>
             </div>
 
             <div className="game-list">
@@ -558,6 +802,7 @@ function PatientHome() {
                     {game.icon.split("\n").map((line, index) => (
                       <span key={index}>
                         {line}
+
                         {index === 0 && game.icon.includes("\n") ? (
                           <br />
                         ) : null}
@@ -585,35 +830,48 @@ function PatientHome() {
             <div className="hero-overlay"></div>
 
             <div className="hero-content">
-              <h1>{timeData.greeting}</h1>
+              <h1>{t(`home.${timeData.greetingKey || "goodMorning"}`)}</h1>
 
-              <p className="hero-subtitle">Ready for a healthy mind today?</p>
+              <p className="hero-subtitle">{t("home.subtitle")}</p>
 
-              <p className="eyebrow">RECOMMENDED GAME</p>
+              <div className="home-voice-help">
+                <VoiceButton
+                  text={[
+                    t(`home.${timeData.greetingKey || "goodMorning"}`),
+                    t("home.voiceIntro"),
+                    t("home.recommended"),
+                    activeRecommendedGame.name,
+                    activeRecommendedGame.description,
+                  ].join(" ")}
+                  label={t("common.voiceHelp")}
+                />
+              </div>
+
+              <p className="eyebrow">{t("home.recommended")}</p>
 
               <div className="recommendation-card">
                 <span
                   className={`recommendation-icon ${
-                    recommendedGame.id === "memory"
+                    activeRecommendedGame.id === "memory"
                       ? "lavender-icon"
-                      : recommendedGame.id === "routine"
+                      : activeRecommendedGame.id === "routine"
                         ? "mint-icon"
-                        : recommendedGame.id === "attention"
+                        : activeRecommendedGame.id === "attention"
                           ? "yellow-icon"
-                          : recommendedGame.id === "recognition"
+                          : activeRecommendedGame.id === "recognition"
                             ? "pink-icon"
                             : "blue-icon"
                   }`}
                 >
-                  {recommendedGame.icon}
+                  {activeRecommendedGame.icon}
                 </span>
 
                 <div>
-                  <h2>{recommendedGame.name}</h2>
+                  <h2>{activeRecommendedGame.name}</h2>
 
-                  <p>{recommendedGame.description}</p>
+                  <p>{activeRecommendedGame.description}</p>
 
-                  <span className="weak-game-label">Recommended for you</span>
+                  <span className="weak-game-label">{t("home.recommendedForYou")}</span>
                 </div>
               </div>
 
@@ -733,13 +991,18 @@ function PatientHome() {
               </div>
 
               <div>
-                <span>Language</span>
-                <strong>{language}</strong>
+                <span>{t("common.language")}</span>
+                <strong>{LANGUAGES.find((item) => item.code === language)?.nativeName || "English"}</strong>
+              </div>
+
+              <div>
+                <span>State</span>
+                <strong>{selectedStateName}</strong>
               </div>
             </div>
 
             <button className="logout-btn" onClick={handleLogout}>
-              Log Out
+              {t("home.logout")}
             </button>
           </div>
         </div>

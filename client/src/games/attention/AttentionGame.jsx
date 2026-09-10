@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import "./AttentionGame.css";
 
 import { savePuzzleResult } from "../../services/puzzleDb";
 
-// =====================================================
-// IMAGE LOADING
-// =====================================================
+/* =====================================================
+   IMAGE LOADING
+===================================================== */
 
 const imageModules = import.meta.glob(
   "../../assets/puzzle/**/*.{png,jpg,jpeg,webp}",
@@ -17,9 +18,9 @@ const imageModules = import.meta.glob(
   },
 );
 
-// =====================================================
-// LEVEL CONFIG
-// =====================================================
+/* =====================================================
+   LEVEL CONFIG
+===================================================== */
 
 const levelConfig = {
   1: {
@@ -53,57 +54,54 @@ const levelConfig = {
   },
 };
 
-// =====================================================
-// GAME
-// =====================================================
+/* =====================================================
+   GAME
+===================================================== */
 
 function AttentionGame() {
-  // Currently hardcoded
-  const selectedState = "Assam";
+  const navigate = useNavigate();
 
-  // ===================================================
-  // STATE
-  // ===================================================
+  const selectedState =
+    localStorage.getItem("manasState") ||
+    sessionStorage.getItem("manasState") ||
+    "Assam";
+
+  /* ===================================================
+     STATE
+  =================================================== */
 
   const [level, setLevel] = useState(1);
-
   const [image, setImage] = useState(null);
-
   const [phase, setPhase] = useState("observation");
 
   const [pieces, setPieces] = useState([]);
-
   const [selectedPiece, setSelectedPiece] = useState(null);
 
   const [showHint, setShowHint] = useState(false);
-
   const [difficultyChange, setDifficultyChange] = useState("SAME");
 
   const [isChangingLevel, setIsChangingLevel] = useState(false);
+  const [showExitPopup, setShowExitPopup] = useState(false);
 
-  // ===================================================
-  // REFS
-  // ===================================================
+  /* ===================================================
+     REFS
+  =================================================== */
 
   const lastImageRef = useRef(null);
-
   const observationTimerRef = useRef(null);
-
   const levelTransitionRef = useRef(null);
 
   const puzzleStartTimeRef = useRef(null);
 
   const attemptsRef = useRef(0);
-
   const mistakesRef = useRef(0);
-
   const previousScoreRef = useRef(0);
 
   const draggedPieceRef = useRef(null);
 
-  // ===================================================
-  // GET STATE IMAGES
-  // ===================================================
+  /* ===================================================
+     GET STATE IMAGES
+  =================================================== */
 
   const getStateImages = (state) => {
     const images = [];
@@ -112,7 +110,7 @@ function AttentionGame() {
       const found = Object.entries(imageModules).find(([path]) => {
         return (
           path.includes(`/${state}/`) &&
-          path.match(new RegExp(`/${i}\\.(png|jpg|jpeg|webp)$`, "i"))
+          new RegExp(`/${i}\\.(png|jpg|jpeg|webp)$`, "i").test(path)
         );
       });
 
@@ -124,16 +122,15 @@ function AttentionGame() {
     return images;
   };
 
-  // ===================================================
-  // RANDOM IMAGE
-  // ===================================================
+  /* ===================================================
+     RANDOM IMAGE
+  =================================================== */
 
   const getRandomImage = () => {
     const images = getStateImages(selectedState);
 
     if (images.length === 0) {
       console.error(`No puzzle images found for ${selectedState}`);
-
       return null;
     }
 
@@ -151,9 +148,9 @@ function AttentionGame() {
     return randomImage;
   };
 
-  // ===================================================
-  // CREATE PUZZLE
-  // ===================================================
+  /* ===================================================
+     CREATE PUZZLE
+  =================================================== */
 
   const createPuzzle = (puzzleImage, levelNumber) => {
     const config = levelConfig[levelNumber];
@@ -161,13 +158,11 @@ function AttentionGame() {
     const totalPieces = config.rows * config.cols;
 
     const shuffledPositions = Array.from(
-      {
-        length: totalPieces,
-      },
+      { length: totalPieces },
       (_, index) => index,
     );
 
-    // Shuffle
+    /* Fisher-Yates Shuffle */
     for (let i = shuffledPositions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
 
@@ -177,7 +172,7 @@ function AttentionGame() {
       ];
     }
 
-    // Never start with completely solved puzzle
+    /* Never start completely solved */
     if (
       totalPieces > 1 &&
       shuffledPositions.every((value, index) => value === index)
@@ -195,39 +190,29 @@ function AttentionGame() {
 
       return {
         id: index,
-
         currentPosition: index,
-
         correctPosition,
-
         correctRow,
-
         correctCol,
-
         locked: false,
       };
     });
 
     setPieces(newPieces);
-
     setImage(puzzleImage);
-
     setPhase("puzzle");
-
     setSelectedPiece(null);
-
     setShowHint(false);
 
     attemptsRef.current = 0;
-
     mistakesRef.current = 0;
 
     puzzleStartTimeRef.current = Date.now();
   };
 
-  // ===================================================
-  // START LEVEL
-  // ===================================================
+  /* ===================================================
+     START LEVEL
+  =================================================== */
 
   const startLevel = (levelNumber) => {
     const safeLevel = Math.min(5, Math.max(1, levelNumber));
@@ -241,19 +226,14 @@ function AttentionGame() {
     clearTimeout(observationTimerRef.current);
 
     setLevel(safeLevel);
-
     setPhase("observation");
-
     setImage(randomImage);
 
     setPieces([]);
-
     setSelectedPiece(null);
 
     setShowHint(false);
-
     setDifficultyChange("SAME");
-
     setIsChangingLevel(false);
 
     const config = levelConfig[safeLevel];
@@ -263,23 +243,38 @@ function AttentionGame() {
     }, config.observationTime * 1000);
   };
 
-  // ===================================================
-  // INITIAL GAME
-  // ===================================================
+  /* ===================================================
+     AUTH + INITIAL GAME
+  =================================================== */
 
   useEffect(() => {
+    const token =
+      localStorage.getItem("manasToken") ||
+      sessionStorage.getItem("manasToken");
+
+    const role =
+      localStorage.getItem("manasRole") || sessionStorage.getItem("manasRole");
+
+    const userId =
+      localStorage.getItem("manasUserId") ||
+      sessionStorage.getItem("manasUserId");
+
+    if (!token || role !== "patient" || !userId) {
+      navigate("/");
+      return;
+    }
+
     startLevel(1);
 
     return () => {
       clearTimeout(observationTimerRef.current);
-
       clearTimeout(levelTransitionRef.current);
     };
-  }, []);
+  }, [navigate]);
 
-  // ===================================================
-  // ML PREDICTION
-  // ===================================================
+  /* ===================================================
+     ML PREDICTION
+  =================================================== */
 
   const getDifficultyPrediction = async (gameData) => {
     try {
@@ -287,11 +282,9 @@ function AttentionGame() {
         "http://localhost:5000/api/puzzle/difficulty/predict",
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify(gameData),
         },
       );
@@ -310,14 +303,13 @@ function AttentionGame() {
     } catch (error) {
       console.error("Puzzle ML error:", error);
 
-      // Offline fallback
       return "SAME";
     }
   };
 
-  // ===================================================
-  // SAVE RESULT
-  // ===================================================
+  /* ===================================================
+     SAVE RESULT
+  =================================================== */
 
   const saveCompletedResult = async (
     finalAttempts,
@@ -341,19 +333,15 @@ function AttentionGame() {
 
     const puzzleData = {
       level,
-
       rows: config.rows,
-
       cols: config.cols,
 
       puzzlePieces: totalPieces,
 
       attempts: finalAttempts,
-
       mistakes: finalMistakes,
 
       accuracy: Number(accuracy.toFixed(2)),
-
       responseTime: Number(responseTime.toFixed(2)),
 
       score,
@@ -380,9 +368,9 @@ function AttentionGame() {
     };
   };
 
-  // ===================================================
-  // AUTOMATIC LEVEL CHANGE
-  // ===================================================
+  /* ===================================================
+     AUTOMATIC LEVEL CHANGE
+  =================================================== */
 
   const moveAutomatically = (difficulty) => {
     let newLevel = level;
@@ -395,18 +383,16 @@ function AttentionGame() {
       newLevel = Math.max(1, level - 1);
     }
 
-    // SAME = same level
-
     setIsChangingLevel(true);
 
     levelTransitionRef.current = setTimeout(() => {
       startLevel(newLevel);
-    }, 700);
+    }, 1200);
   };
 
-  // ===================================================
-  // SWAP PIECES
-  // ===================================================
+  /* ===================================================
+     SWAP PIECES
+  =================================================== */
 
   const swapPieces = async (firstIndex, secondIndex) => {
     if (firstIndex === secondIndex) {
@@ -414,14 +400,12 @@ function AttentionGame() {
     }
 
     const firstPiece = pieces[firstIndex];
-
     const secondPiece = pieces[secondIndex];
 
     if (!firstPiece || !secondPiece) {
       return;
     }
 
-    // Locked pieces cannot move
     if (firstPiece.locked || secondPiece.locked) {
       return;
     }
@@ -430,25 +414,15 @@ function AttentionGame() {
 
     updatedPieces[firstIndex] = {
       ...secondPiece,
-
       currentPosition: firstIndex,
     };
 
     updatedPieces[secondIndex] = {
       ...firstPiece,
-
       currentPosition: secondIndex,
     };
 
-    // -----------------------------------------------
-    // ATTEMPT
-    // -----------------------------------------------
-
     attemptsRef.current += 1;
-
-    // -----------------------------------------------
-    // CHECK NEWLY CORRECT PIECES
-    // -----------------------------------------------
 
     let newlyLocked = 0;
 
@@ -465,29 +439,17 @@ function AttentionGame() {
       return piece;
     });
 
-    // -----------------------------------------------
-    // WRONG SWAP = MISTAKE
-    // -----------------------------------------------
-
     if (newlyLocked === 0) {
       mistakesRef.current += 1;
     }
 
     setPieces(lockedPieces);
 
-    // -----------------------------------------------
-    // CHECK COMPLETION
-    // -----------------------------------------------
-
     const completed = lockedPieces.every((piece) => piece.locked);
 
     if (!completed) {
       return;
     }
-
-    // ===============================================
-    // METRICS
-    // ===============================================
 
     const config = levelConfig[level];
 
@@ -497,59 +459,34 @@ function AttentionGame() {
 
     const responseTime = (Date.now() - puzzleStartTimeRef.current) / 1000;
 
-    // ===============================================
-    // ML
-    // ===============================================
-
+    /* ML */
     const prediction = await getDifficultyPrediction({
       puzzle_pieces: totalPieces,
-
       accuracy: Number(accuracy.toFixed(2)),
-
       response_time: Number(responseTime.toFixed(2)),
-
       attempts: attemptsRef.current,
-
       mistakes: mistakesRef.current,
-
       previous_score: previousScoreRef.current,
-
       current_level: level,
     });
 
-    // ===============================================
-    // FINAL DIFFICULTY
-    // ===============================================
-    // IMPORTANT:
-    // Do NOT convert HARDER at Level 5 to SAME.
-    // moveAutomatically() handles the Level 5 boundary.
+    console.log("Puzzle ML Prediction:", prediction);
 
-    const finalDifficulty = prediction;
-
-    console.log("Puzzle ML Prediction:", finalDifficulty);
-
-    // ===============================================
-    // SAVE
-    // ===============================================
-
+    /* SAVE */
     await saveCompletedResult(
       attemptsRef.current,
       mistakesRef.current,
-      finalDifficulty,
+      prediction,
     );
 
-    // ===============================================
-    // AUTOMATIC NEXT PUZZLE
-    // ===============================================
+    setDifficultyChange(prediction);
 
-    setDifficultyChange(finalDifficulty);
-
-    moveAutomatically(finalDifficulty);
+    moveAutomatically(prediction);
   };
 
-  // ===================================================
-  // CLICK TO SWAP
-  // ===================================================
+  /* ===================================================
+     CLICK TO SWAP
+  =================================================== */
 
   const handlePieceClick = (index) => {
     if (pieces[index]?.locked) {
@@ -558,13 +495,11 @@ function AttentionGame() {
 
     if (selectedPiece === null) {
       setSelectedPiece(index);
-
       return;
     }
 
     if (selectedPiece === index) {
       setSelectedPiece(null);
-
       return;
     }
 
@@ -573,14 +508,13 @@ function AttentionGame() {
     setSelectedPiece(null);
   };
 
-  // ===================================================
-  // DRAG START
-  // ===================================================
+  /* ===================================================
+     DRAG START
+  =================================================== */
 
   const handleDragStart = (e, index) => {
     if (pieces[index]?.locked) {
       e.preventDefault();
-
       return;
     }
 
@@ -589,9 +523,9 @@ function AttentionGame() {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  // ===================================================
-  // DROP
-  // ===================================================
+  /* ===================================================
+     DROP
+  =================================================== */
 
   const handleDrop = (e, targetIndex) => {
     e.preventDefault();
@@ -604,7 +538,6 @@ function AttentionGame() {
 
     if (sourceIndex === targetIndex) {
       draggedPieceRef.current = null;
-
       return;
     }
 
@@ -613,165 +546,209 @@ function AttentionGame() {
     draggedPieceRef.current = null;
   };
 
-  // ===================================================
-  // CONFIG
-  // ===================================================
-
   const config = levelConfig[level];
 
-  // ===================================================
-  // RENDER
-  // ===================================================
+  /* ===================================================
+     RENDER
+  =================================================== */
 
   return (
-    <div className="puzzle-container">
-      {/* ========================================= */}
-      {/* HEADER */}
-      {/* ========================================= */}
+    <div className="puzzle-page">
+      <div className="puzzle-container">
+        {/* =========================================
+            TOP BAR
+        ========================================= */}
 
-      <div className="puzzle-header">
-        <div className="game-label">SMRITISETU</div>
+        <div className="puzzle-topbar">
+          <button
+            type="button"
+            className="puzzle-back-button"
+            onClick={() => setShowExitPopup(true)}
+          >
+            ‹ Back
+          </button>
 
-        <h1>Puzzle Game</h1>
-
-        <p>Recreate the picture</p>
-      </div>
-
-      {/* ========================================= */}
-      {/* OBSERVATION */}
-      {/* ========================================= */}
-
-      {phase === "observation" && (
-        <div className="observation-card">
-          <div className="section-heading">
-            <span className="section-number">1</span>
-
-            <div>
-              <h2>Observe the picture</h2>
-
-              <p>Look carefully and remember the picture.</p>
-            </div>
-          </div>
-
-          <div className="reference-image-box">
-            {image && (
-              <img src={image} alt="Reference" className="reference-image" />
-            )}
-          </div>
-
-          <p className="observation-message">
-            Take your time. There is no need to hurry.
-          </p>
+          <div className="puzzle-level">Level {level}</div>
         </div>
-      )}
 
-      {/* ========================================= */}
-      {/* PUZZLE */}
-      {/* ========================================= */}
+        {/* =========================================
+            OBSERVATION
+        ========================================= */}
 
-      {phase === "puzzle" && (
-        <div className="puzzle-card">
-          <div className="puzzle-card-header">
-            <div className="section-heading">
-              <span className="section-number">2</span>
+        {phase === "observation" && (
+          <div className="puzzle-game-card">
+            <div className="puzzle-header">
+              <div className="puzzle-title-wrapper">
+                <span className="leaf-icon">🌿</span>
 
-              <div>
-                <h2>Recreate the picture</h2>
+                <h2>Observe the Picture</h2>
 
-                <p>Click two pieces to swap them or drag a piece.</p>
+                <span className="leaf-icon">🌿</span>
+              </div>
+
+              <div className="title-badge">
+                <p className="subtext">
+                  Look carefully and remember the picture.
+                </p>
               </div>
             </div>
-          </div>
 
-          <div className="puzzle-game-area">
-            {/* ================================= */}
-            {/* HINT */}
-            {/* ================================= */}
-
-            <div className="hint-side-box">
-              {!showHint ? (
-                <button
-                  className="hint-button"
-                  onClick={() => setShowHint(true)}
-                >
-                  Hint
-                </button>
-              ) : (
-                <div className="hint-card">
-                  {image && (
-                    <img src={image} alt="Hint" className="hint-image" />
-                  )}
-
-                  <button
-                    className="hint-close"
-                    onClick={() => setShowHint(false)}
-                  >
-                    Hide
-                  </button>
-                </div>
+            <div className="reference-image-box">
+              {image && (
+                <img src={image} alt="Reference" className="reference-image" />
               )}
             </div>
 
-            {/* ================================= */}
-            {/* PUZZLE BOARD */}
-            {/* ================================= */}
+            <p className="observation-message">
+              Take your time. There is no need to hurry.
+            </p>
+          </div>
+        )}
 
-            <div
-              className="puzzle-board"
-              style={{
-                "--cols": config.cols,
-                "--rows": config.rows,
-              }}
-            >
-              {pieces.map((piece, index) => (
-                <div
-                  key={piece.id}
-                  className={`
-                      puzzle-piece
-                      ${selectedPiece === index ? "selected-piece" : ""}
-                      ${piece.locked ? "locked-piece" : ""}
-                    `}
-                  onClick={() => handlePieceClick(index)}
-                  draggable={!piece.locked}
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => handleDrop(e, index)}
-                >
-                  {image && (
-                    <img
-                      src={image}
-                      alt=""
-                      draggable={false}
-                      style={{
-                        "--correct-col": piece.correctCol,
-                        "--correct-row": piece.correctRow,
-                      }}
-                    />
-                  )}
-                </div>
-              ))}
+        {/* =========================================
+            PUZZLE
+        ========================================= */}
+
+        {phase === "puzzle" && (
+          <div className="puzzle-game-card">
+            <div className="puzzle-header">
+              <div className="puzzle-title-wrapper">
+                <span className="leaf-icon">🌿</span>
+
+                <h2>Recreate the Picture</h2>
+
+                <span className="leaf-icon">🌿</span>
+              </div>
+
+              <div className="title-badge">
+                <p className="subtext">
+                  Click two pieces to swap them or drag a piece.
+                </p>
+              </div>
+            </div>
+
+            <div className="puzzle-game-area">
+              {/* HINT */}
+
+              <div className="hint-side-box">
+                {!showHint ? (
+                  <button
+                    type="button"
+                    className="hint-button"
+                    onClick={() => setShowHint(true)}
+                  >
+                    💡 Hint
+                  </button>
+                ) : (
+                  <div className="hint-card">
+                    {image && (
+                      <img src={image} alt="Hint" className="hint-image" />
+                    )}
+
+                    <button
+                      type="button"
+                      className="hint-close"
+                      onClick={() => setShowHint(false)}
+                    >
+                      Hide
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* PUZZLE BOARD */}
+
+              <div
+                className="puzzle-board"
+                style={{
+                  "--cols": config.cols,
+                  "--rows": config.rows,
+                }}
+              >
+                {pieces.map((piece, index) => (
+                  <div
+                    key={piece.id}
+                    className={`
+                        puzzle-piece
+                        ${selectedPiece === index ? "selected-piece" : ""}
+                        ${piece.locked ? "locked-piece" : ""}
+                      `}
+                    onClick={() => handlePieceClick(index)}
+                    draggable={!piece.locked}
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => handleDrop(e, index)}
+                  >
+                    {image && (
+                      <img
+                        src={image}
+                        alt=""
+                        draggable={false}
+                        style={{
+                          "--correct-col": piece.correctCol,
+                          "--correct-row": piece.correctRow,
+                        }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ========================================= */}
-      {/* AUTOMATIC TRANSITION */}
-      {/* ========================================= */}
+        {/* =========================================
+            LEVEL TRANSITION
+        ========================================= */}
 
-      {isChangingLevel && (
-        <div className="level-transition">
-          <div className="transition-spinner">
-            <span></span>
+        {isChangingLevel && (
+          <div className="level-transition">
+            <div className="transition-spinner">
+              <span></span>
+            </div>
+
+            <p>
+              {difficultyChange === "HARDER"
+                ? "Great work! Let's try a little more."
+                : difficultyChange === "EASIER"
+                  ? "Let's try a simpler puzzle."
+                  : "Let's try another puzzle."}
+            </p>
           </div>
+        )}
+      </div>
 
-          <p>
-            {difficultyChange === "HARDER"
-              ? "Great work! Let's try a little more."
-              : difficultyChange === "EASIER"
-                ? "Let's try a simpler puzzle."
-                : "Let's try another puzzle."}
-          </p>
+      {/* =========================================
+          EXIT POPUP
+      ========================================= */}
+
+      {showExitPopup && (
+        <div className="puzzle-overlay">
+          <div className="puzzle-exit-popup">
+            <div className="exit-icon">🌿</div>
+
+            <h2>Exit Game?</h2>
+
+            <p>Are you sure you want to leave?</p>
+
+            <div className="puzzle-popup-buttons">
+              <button
+                type="button"
+                className="puzzle-cancel-btn"
+                onClick={() => setShowExitPopup(false)}
+              >
+                Continue
+              </button>
+
+              <button
+                type="button"
+                className="puzzle-exit-btn"
+                onClick={() => navigate("/patient")}
+              >
+                Exit
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
